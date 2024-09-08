@@ -85,47 +85,82 @@ export default function RegisterPage() {
             height="100vh"
             alignItems="center"
             justifyContent="center"
+            sx={{
+                backgroundImage: 'url(https://i.imgur.com/2bUXNNG.png)',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: 'cover' // Cambio para que el degradado se dirija hacia la esquina inferior derecha
+            }}
+
         >
-            {/* <CustomModal open={showErrorModal} onClick={() => setShowErrorModal(false)} onClose={() => setShowErrorModal(false)} text={errorText} buttonText='Ok' />
+            {/* {showErrorModal && (
+                <CustomModal
+                    open={showErrorModal}
+                    onClick={() => setShowErrorModal(false)}
+                    onClose={() => setShowErrorModal(false)}
+                    text="Usuario o contraseña incorrectos"
+                    buttonText="OK"
+                />
+            )}
             <LoadingModal open={showLoading} onClose={() => setShowLoading(false)} /> */}
             <Box
                 display="flex"
                 flex="1"
-                flexDirection="column"
-                width="100%"
+                flexDirection="row"
+                width="90%"
                 justifyContent="space-around"
                 alignItems="center"
             >
                 <Box
                     display="flex"
-                    flex="0.2"
+                    flex="0.4"
                     justifyContent="center"
                     alignItems="center"
+                    flexDirection="column"
                     width="100%"
                 >
-                    <Typography variant="h4">Propia</Typography>
+                    <Box
+                        component="img"
+                        sx={{
+                            height: '70%',
+                            width: '70%',
+                            marginBottom: '1%',
+                            marginTop: '1%'
+                        }}
+                        alt="The house from the offer."
+                        src="https://i.imgur.com/Zm4y7ub.png"
+                    />
                 </Box>
                 <Box
                     display="flex"
-                    flex="0.8"
+                    flex="0.6"
                     flexDirection="column"
                     justifyContent="center"
-                    width="30%"
+                    alignItems='center'
                 >
-                    <Typography variant="h5" align="center">
-                        ¡Bienvenido!
-                    </Typography>
                     <Box
                         component="form"
                         display="flex"
                         flexDirection="column"
                         justifyContent="center"
+                        width='70%'
                         onSubmit={handleSubmit(handleFormSubmit)}
                     >
                         <TextField
                             id="name"
                             label="Nombre"
-                            sx={{ marginTop: 5 }}
+                            sx={{
+                                marginTop: '3%',
+                                bgcolor: 'white',
+                                borderRadius: '20px',
+                                '& .MuiOutlinedInput-root': {
+                                  '& fieldset': {
+                                    border: 'none', // Eliminar el borde del TextField
+                                  },
+                                },
+                                '& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-shrink': {
+                                  transform: 'translate(20px, 0) scale(0.7)', // Ajusta la posición y el tamaño de la etiqueta
+                                },
+                              }}
                             {...register("username", {
                                 required: "Enter your username",
                             })}
@@ -135,7 +170,19 @@ export default function RegisterPage() {
                         <TextField
                             id="email"
                             label="Email"
-                            sx={{ marginTop: 5 }}
+                            sx={{
+                                marginTop: '3%',
+                                bgcolor: 'white',
+                                borderRadius: '20px',
+                                '& .MuiOutlinedInput-root': {
+                                  '& fieldset': {
+                                    border: 'none', // Eliminar el borde del TextField
+                                  },
+                                },
+                                '& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-shrink': {
+                                  transform: 'translate(20px, 0) scale(0.7)', // Ajusta la posición y el tamaño de la etiqueta
+                                },
+                              }}
                             {...register("email", {
                                 required: "Ingrese su email",
                                 pattern: {
@@ -150,7 +197,19 @@ export default function RegisterPage() {
                             label="Contraseña"
                             id="password"
                             type={showPassword ? "text" : "password"}
-                            sx={{ marginTop: 5 }}
+                            sx={{
+                                marginTop: '3%',
+                                bgcolor: 'white',
+                                borderRadius: '20px',
+                                '& .MuiOutlinedInput-root': {
+                                  '& fieldset': {
+                                    border: 'none', // Eliminar el borde del TextField
+                                  },
+                                },
+                                '& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-shrink': {
+                                  transform: 'translate(20px, 0) scale(0.7)', // Ajusta la posición y el tamaño de la etiqueta
+                                },
+                              }}
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
@@ -173,7 +232,7 @@ export default function RegisterPage() {
                         <Button
                             type="submit"
                             variant="contained"
-                            sx={{ marginTop: 5, height: 50 }}
+                            sx={{ marginTop: '5%', height: '30%', borderRadius: '20px' }}
                         >
                             Registrarse
                         </Button>

@@ -92,7 +92,9 @@ export default function LoginPage() {
             alignItems="center"
             justifyContent="center"
             sx={{
-                background: 'linear-gradient(to bottom right, #FFFFFF 80%, #5696d1 100%)' // Cambio para que el degradado se dirija hacia la esquina inferior derecha
+                backgroundImage: 'url(https://i.imgur.com/2bUXNNG.png)',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: 'cover' // Cambio para que el degradado se dirija hacia la esquina inferior derecha
             }}
 
         >
@@ -109,14 +111,14 @@ export default function LoginPage() {
             <Box
                 display="flex"
                 flex="1"
-                flexDirection="column"
-                width="100%"
+                flexDirection="row"
+                width="90%"
                 justifyContent="space-around"
                 alignItems="center"
             >
                 <Box
                     display="flex"
-                    flex="0.2"
+                    flex="0.4"
                     justifyContent="center"
                     alignItems="center"
                     flexDirection="column"
@@ -126,7 +128,7 @@ export default function LoginPage() {
                         component="img"
                         sx={{
                             height: '70%',
-                            width: '30%',
+                            width: '70%',
                             marginBottom: '1%',
                             marginTop: '1%'
                         }}
@@ -136,23 +138,35 @@ export default function LoginPage() {
                 </Box>
                 <Box
                     display="flex"
-                    flex="0.8"
+                    flex="0.6"
                     flexDirection="column"
-                    justifyContent="flex-start"
-                    width="30%"
-                    sx={{ marginTop: '2%' }}
+                    justifyContent="center"
+                    alignItems='center'
                 >
                     <Box
                         component="form"
                         display="flex"
                         flexDirection="column"
                         justifyContent="center"
+                        width='70%'
                         onSubmit={handleSubmit(handleFormSubmit)}
                     >
                         <TextField
                             id="email"
                             label="Email"
-                            sx={{ marginTop: '3%' }}
+                            sx={{
+                                marginTop: '3%',
+                                bgcolor: 'white',
+                                borderRadius: '20px',
+                                '& .MuiOutlinedInput-root': {
+                                  '& fieldset': {
+                                    border: 'none', // Eliminar el borde del TextField
+                                  },
+                                },
+                                '& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-shrink': {
+                                  transform: 'translate(20px, 0) scale(0.7)', // Ajusta la posición y el tamaño de la etiqueta
+                                },
+                              }}
                             {...register("email", {
                                 required: "Enter you email",
                                 pattern: {
@@ -164,10 +178,22 @@ export default function LoginPage() {
                             helperText={errors.email?.message}
                         />
                         <TextField
-                            label="Password"
+                            label="Contraseña"
                             id="password"
                             type={showPassword ? "text" : "password"}
-                            sx={{ marginTop: '2%' }}
+                            sx={{
+                                marginTop: '3%',
+                                bgcolor: 'white',
+                                borderRadius: '20px',
+                                '& .MuiOutlinedInput-root': {
+                                  '& fieldset': {
+                                    border: 'none', // Eliminar el borde del TextField
+                                  },
+                                },
+                                '& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-shrink': {
+                                  transform: 'translate(20px, 0) scale(0.7)', // Ajusta la posición y el tamaño de la etiqueta
+                                },
+                              }}
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
@@ -187,21 +213,23 @@ export default function LoginPage() {
                             error={!!errors.password}
                             helperText={errors.password?.message}
                         />
+                        <Box width='100%' sx={{marginTop: "5%"}} display='flex' flexDirection='row' justifyContent='space-around' alignItems='center'>
                         <Button
                             type="submit"
                             variant="contained"
-                            sx={{ marginTop: "2%", height: '30%' }}
+                            sx={{ width: '45%', height: '30%', borderRadius: '20px' }}
                         >
                             Iniciar sesión
                         </Button>
-                    </Box>
-                    <Button
+                        <Button
                         href="../register"
-                        variant="outlined"
-                        sx={{ marginTop: "2%", height: '7%' }}
+                        variant="contained"
+                        sx={{ width:'45%', height: '30%', borderRadius: '20px'}}
                     >
                         Registrarse
                     </Button>
+                        </Box>
+                    </Box>
                 </Box>
             </Box>
         </Box>
