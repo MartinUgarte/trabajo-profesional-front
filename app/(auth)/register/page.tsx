@@ -67,6 +67,7 @@ export default function RegisterPage() {
             })
             .then((data) => {
                 console.log('Data: ', data)
+                router.push("../filter");
             })
     };
 
@@ -127,7 +128,7 @@ export default function RegisterPage() {
                             marginTop: '1%'
                         }}
                         alt="The house from the offer."
-                        src="https://i.imgur.com/Zm4y7ub.png"
+                        src="https://i.imgur.com/wE0iUm5.png"
                     />
                 </Box>
                 <Box

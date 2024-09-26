@@ -76,6 +76,7 @@ export default function LoginPage() {
                 if (data.access_token) {
                     console.log("Got data from login id: ", data);
                     localStorage.setItem("jwtToken", data.access_token);
+                    router.push('../filter' )
                 }
             });
     };
@@ -133,7 +134,7 @@ export default function LoginPage() {
                             marginTop: '1%'
                         }}
                         alt="The house from the offer."
-                        src="https://i.imgur.com/Zm4y7ub.png"
+                        src="https://i.imgur.com/wE0iUm5.png"
                     />
                 </Box>
                 <Box
