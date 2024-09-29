@@ -11,12 +11,15 @@ import {
     TextField,
     Typography,
     MenuItem,
+    Modal,
+    CircularProgress,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import IconButton from '@mui/material/IconButton';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import LoadingModal from "../../LoadingModal";
 
 type FormValues = {
     propertyType: string;
@@ -36,6 +39,7 @@ export default function Filter() {
     const [minRooms, setMinRooms] = useState<number>(0);
     const [maxRooms, setMaxRooms] = useState<number>(0);
     const [hasGarage, setHasGarage] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);  // Estado para el modal de carga
     const router = useRouter();
 
     const form = useForm<FormValues>({
@@ -61,22 +65,28 @@ export default function Filter() {
         };
     }, []);
 
-    const handleFilterSubmit = (formData: FormValues) => {
-        // setPropertyType(formData.propertyType);
-        // setMinPrice(formData.minPrice);
-        // setMaxPrice(formData.maxPrice);
-        // setCurrency(formData.currency);
-        // setMinRooms(formData.minRooms);
-        // setMaxRooms(formData.maxRooms);
-        // setHasGarage(formData.hasGarage);
+    const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+    const handleFilterSubmit = async (formData: FormValues) => {
         localStorage.setItem("propertyType", formData.propertyType.toString());
         localStorage.setItem("minPrice", formData.minPrice.toString());
         localStorage.setItem("maxPrice", formData.maxPrice.toString());
         localStorage.setItem("currency", formData.currency.toString());
         localStorage.setItem("minRooms", formData.minRooms.toString());
-        localStorage.setItem("maxPrice", formData.maxRooms.toString());
+        localStorage.setItem("maxRooms", formData.maxRooms.toString());
         localStorage.setItem("hasGarage", formData.hasGarage.toString());
+
+        // Mostrar el modal de carga
+        setLoading(true);
+
+        // Simulación de espera con sleep
+        await sleep(1000);
+
+        // Redireccionar a la siguiente página
         router.push('../places');
+
+        // Ocultar el modal de carga
+        setLoading(false);
     };
 
     const handleInput = (e) => {
@@ -93,6 +103,8 @@ export default function Filter() {
             height="100vh"
             sx={{ bgcolor: 'white' }}
         >
+            <LoadingModal open={loading} /> 
+
             <Box width='100%' height='100%' display='flex' flexDirection='column' justifyContent='flex-end' alignItems='center' flex='0.3'>
                 <Typography sx={{ fontFamily: 'Rubik', fontSize: '300%', color: '#083240' }} variant="h4" gutterBottom>
                     ¡Bienvenido!
@@ -102,7 +114,7 @@ export default function Filter() {
                 </Typography>
             </Box>
             <Box width='100%' flexDirection='column' justifyContent='center' alignItems='center' height='100%' display='flex' flex='0.7' component="form" onSubmit={handleSubmit(handleFilterSubmit)}>
-                <Box display='flex' flex='0.7' width='40%' height='100%' justifyContent='center' flexDirection='column'>
+                <Box  display='flex' flex='0.7' width='40%' height='100%' justifyContent='center' flexDirection='column'>
                     <TextField
                         fullWidth
                         id="property-type-select"
@@ -179,21 +191,24 @@ export default function Filter() {
                 </Box>
 
                 <Box display='flex' flex='0.3' width='100%' height='100%' justifyContent='flex-end'>
-                    <IconButton
-                        type="submit"
-                        sx={{
-                            mr: '5%',
-                            mb: '1%',
-                            color: '#083240',
-                            padding: 0,
-                            '& .MuiSvgIcon-root': {
-                                fontSize: 50,
-                                padding: '12px',
-                            },
-                        }}
-                    >
-                        <ArrowForwardIosIcon />
-                    </IconButton>
+                    <Box sx={{ height: '50%', width: '10%' }}>
+                        <IconButton
+                            type="submit"
+                            sx={{
+                                mr: '5%',
+                                mb: '1%',
+                                color: '#083240',
+                                padding: 0,
+                                '& .MuiSvgIcon-root': {
+                                    fontSize: 50,
+                                    padding: '12px',
+                                },
+                            }}
+                        >
+                            <ArrowForwardIosIcon />
+                        </IconButton>
+                    </Box>
+
                 </Box>
             </Box>
         </Box>

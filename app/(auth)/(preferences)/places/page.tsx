@@ -5,6 +5,8 @@ import {
     TextField,
     Typography,
     IconButton,
+    Modal,
+    CircularProgress,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
@@ -13,13 +15,18 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import LoadingModal from "../../LoadingModal";
 
 type FormValues = {
     frequentedPlaces: string[];
 };
 
+// Función sleep para retrasar la ejecución por un tiempo especificado
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export default function Filter() {
     const [frequentedPlaces, setFrequentedPlaces] = useState<string[]>([""]);
+    const [loading, setLoading] = useState(false); // Estado para el modal de carga
     const router = useRouter();
 
     const form = useForm<FormValues>({
@@ -38,27 +45,17 @@ export default function Filter() {
         };
     }, []);
 
-    const handlePlacesSubmit = (formData: FormValues) => {
-        let jwtToken = localStorage.getItem('jwtToken')
+    // Cambiamos esta función a async para poder usar await
+    const handlePlacesSubmit = async (formData: FormValues) => {
+        let jwtToken = localStorage.getItem('jwtToken');
         if (!jwtToken) {
-            return 
+            return;
         }
-        // Actualiza el estado con los valores del formulario
-        let property_type = localStorage.getItem("propertyType");
-        let min_price = localStorage.getItem("minPrice");
-        let max_price = localStorage.getItem("maxPrice");
-        let currency = localStorage.getItem("currency");
-        let min_rooms = localStorage.getItem("minRooms");
-        let max_rooms = localStorage.getItem("maxPrice");
-        let has_garage = localStorage.getItem("hasGarage");
-        console.log('aa: ', frequentedPlaces)
-        console.log('property type: ', property_type)
-        console.log('min_price: ', min_price)
-        console.log('max price: ', max_price)
-        console.log('currency: ', currency)
-        console.log('min rooms: ', min_rooms)
-        console.log('max romos: ', max_rooms)
-        console.log('has garage: ', has_garage)
+
+        setLoading(true);
+
+        await sleep(1000);
+
         fetch(`http://localhost:8000/collaborative/recommend?user_id=${5}`, {
             method: "GET",
             headers: {
@@ -66,12 +63,17 @@ export default function Filter() {
                 "Authorization": `Bearer ${jwtToken}`
             },
         })
-            .then((res) => {
-                console.log(res);
-                return res.json();
-            })
+            .then((res) => res.json())
             .then((data) => {
-                console.log("La data: ", data);
+                localStorage.setItem("recommendations", JSON.stringify(data));
+                router.push('../recommendations');
+            })
+            .catch((error) => {
+                console.error("Error fetching recommendations:", error);
+            })
+            .finally(() => {
+                // Ocultar modal de carga
+                setLoading(false);
             });
     };
 
@@ -97,12 +99,14 @@ export default function Filter() {
             flexDirection="column"
             alignItems="center"
             justifyContent="center"
-            height="100vh" // Ocupa toda la altura de la pantalla
+            height="100vh"
             sx={{ bgcolor: 'white' }}
         >
+            <LoadingModal open={loading} />
+
             <Box width='100%' height='100%' display='flex' flexDirection='column' justifyContent='flex-end' alignItems='center' flex='0.3'>
                 <Typography sx={{ fontFamily: 'Rubik', fontSize: '300%', color: '#083240' }} variant="h4" gutterBottom>
-                    ¡Bienvenido!
+                    ¡Genial!
                 </Typography>
                 <Typography sx={{ fontFamily: 'Rubik', color: 'black', fontSize: '150%' }} variant="h4" gutterBottom>
                     ¿Qué lugares frecuentas?
@@ -116,12 +120,11 @@ export default function Filter() {
                     width="40%"
                     flex="0.6"
                     sx={{
-                        maxHeight: '250px',  // Altura máxima del área con scroll
-                        overflowY: 'auto',   // Scroll automático
+                        maxHeight: '250px',
+                        overflowY: 'auto',
                         padding: '20px',
                     }}
                 >
-                    {/* Mapeo de los lugares frecuentados */}
                     {frequentedPlaces.map((place, index) => (
                         <Box key={index} display="flex" alignItems="center" sx={{ marginBottom: 2 }}>
                             <TextField
@@ -137,46 +140,46 @@ export default function Filter() {
                         </Box>
                     ))}
                 </Box>
-                <Box display="flex"
-                    flexDirection="column"
-                    width="15%"
-                    flex="0.1">
+                <Box display="flex" flexDirection="column" width="15%" height='100%' flex="0.1">
                     <IconButton onClick={handleAddPlace} sx={{ color: '#083240', marginTop: 2 }}>
                         <AddIcon />
                         Añadir lugar
                     </IconButton>
                 </Box>
-                <Box display="flex" flex="0.3" width="100%" height="100%" justifyContent="space-between">
-                    <IconButton
-                        onClick={() => router.push('../filter')}
-                        sx={{
-                            ml: '5%',
-                            mb: '1%',
-                            color: '#083240',
-                            padding: 0,
-                            '& .MuiSvgIcon-root': {
-                                fontSize: 50,
-                                padding: '12px',
-                            },
-                        }}
-                    >
-                        <ArrowBackIosIcon />
-                    </IconButton>
-                    <IconButton
-                        type="submit"
-                        sx={{
-                            mr: '5%',
-                            mb: '1%',
-                            color: '#083240',
-                            padding: 0,
-                            '& .MuiSvgIcon-root': {
-                                fontSize: 50,
-                                padding: '12px',
-                            },
-                        }}
-                    >
-                        <ArrowForwardIosIcon />
-                    </IconButton>
+                <Box display="flex" flex="0.3" width="100%" height="100%" justifyContent="space-between" alignItems="flex-end" sx={{ paddingBottom: '1%' }}>
+                    <Box sx={{ height: '50%', width: '10%' }}>
+                        <IconButton
+                            onClick={() => router.push('../filter')}
+                            sx={{
+                                ml: '5%',
+                                color: '#083240',
+                                padding: 0,
+                                '& .MuiSvgIcon-root': {
+                                    fontSize: 50,
+                                    padding: '12px',
+                                },
+                            }}
+                        >
+                            <ArrowBackIosIcon />
+                        </IconButton>
+                    </Box>
+
+                    <Box sx={{ height: '50%', width: '10%' }}>
+                        <IconButton
+                            type="submit"
+                            sx={{
+                                mr: '5%',
+                                color: '#083240',
+                                padding: 0,
+                                '& .MuiSvgIcon-root': {
+                                    fontSize: 50,
+                                    padding: '12px',
+                                },
+                            }}
+                        >
+                            <ArrowForwardIosIcon />
+                        </IconButton>
+                    </Box>
                 </Box>
             </Box>
         </Box>

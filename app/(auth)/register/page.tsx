@@ -6,16 +6,13 @@ import {
     IconButton,
     InputAdornment,
     TextField,
-    Typography,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useRouter } from "next/navigation";
-import { JSX, useState } from "react";
-// import CustomModal from 'app/CustomModal';
-// import LoadingModal from 'app/LoadingModal';
-
+import { useState } from "react";
+import ErrorModal from "../ErrorModal";
 
 type FormValues = {
     username: string;
@@ -23,16 +20,12 @@ type FormValues = {
     password: string;
 };
 
-type ResponseError = {
-    msg: string
-}
-
 export default function RegisterPage() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [showLoading, setShowLoading] = useState(false);
     const [showErrorModal, setShowErrorModal] = useState(false);
-    const [errorText, setErrorText] = useState('');
+    const [errorText, setErrorText] = useState("");
 
     const form = useForm<FormValues>({
         defaultValues: {
@@ -42,41 +35,66 @@ export default function RegisterPage() {
         },
     });
 
-    const { register, handleSubmit, formState } = form;
-    const { errors } = formState;
+    const { register, handleSubmit } = form;
 
     const handleFormSubmit = (formData: FormValues) => {
+        // Validaciones del lado del cliente
+        if (!formData.username) {
+            setErrorText("Debe ingresar un nombre de usuario.");
+            setShowErrorModal(true);
+            return;
+        }
+        if (!formData.email) {
+            setErrorText("Debe ingresar un email.");
+            setShowErrorModal(true);
+            return;
+        }
+        if (!/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(formData.email)) {
+            setErrorText("El formato del email es incorrecto.");
+            setShowErrorModal(true);
+            return;
+        }
+        if (!formData.password) {
+            setErrorText("Debe ingresar una contraseña.");
+            setShowErrorModal(true);
+            return;
+        }
+
         setShowLoading(true);
+        console.log(formData);
         fetch(`http://localhost:3000/register`, {
-            method: 'POST',
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json'
+                "Content-Type": "application/json",
             },
             body: JSON.stringify({
                 username: formData.username,
                 email: formData.email,
-                password: formData.password
-            })
+                password: formData.password,
+            }),
         })
             .then((res) => {
-                setShowLoading(false)
-                if (res.status == 201) {
-                    //router.push('../events');
+                setShowLoading(false);
+                if (res.status === 201) {
+                    router.push("../filter");
+                } else {
+                    // Si la respuesta no es 201, intenta obtener el mensaje de error
+                    return res.json().then((data) => {
+                        setErrorText(data.msg || "Error desconocido en el servidor.");
+                        setShowErrorModal(true);
+                    });
                 }
-                return res.json()
             })
-            .then((data) => {
-                console.log('Data: ', data)
-                router.push("../filter");
-            })
+            .catch((error) => {
+                // Capturar errores del lado del cliente o problemas de conexión
+                setErrorText(error.message || "Error en la conexión con el servidor.");
+                setShowErrorModal(true);
+                setShowLoading(false);
+            });
     };
 
     const handleClickShowPassword = () => setShowPassword(!showPassword);
     const handleMouseDownPassword = () => setShowPassword(!showPassword);
-
-    function setError(newError: any) {
-        throw new Error("Function not implemented.");
-    }
 
     return (
         <Box
@@ -88,21 +106,16 @@ export default function RegisterPage() {
             justifyContent="center"
             sx={{
                 backgroundImage: 'url(https://i.imgur.com/2bUXNNG.png)',
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: 'cover' // Cambio para que el degradado se dirija hacia la esquina inferior derecha
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "cover",
             }}
-
         >
-            {/* {showErrorModal && (
-                <CustomModal
-                    open={showErrorModal}
-                    onClick={() => setShowErrorModal(false)}
-                    onClose={() => setShowErrorModal(false)}
-                    text="Usuario o contraseña incorrectos"
-                    buttonText="OK"
-                />
-            )}
-            <LoadingModal open={showLoading} onClose={() => setShowLoading(false)} /> */}
+            <ErrorModal
+                open={showErrorModal}
+                onClose={() => setShowErrorModal(false)}
+                text={errorText}
+            />
+
             <Box
                 display="flex"
                 flex="1"
@@ -122,10 +135,10 @@ export default function RegisterPage() {
                     <Box
                         component="img"
                         sx={{
-                            height: '70%',
-                            width: '70%',
-                            marginBottom: '1%',
-                            marginTop: '1%'
+                            height: "70%",
+                            width: "70%",
+                            marginBottom: "1%",
+                            marginTop: "1%",
                         }}
                         alt="The house from the offer."
                         src="https://i.imgur.com/wE0iUm5.png"
@@ -136,81 +149,69 @@ export default function RegisterPage() {
                     flex="0.6"
                     flexDirection="column"
                     justifyContent="center"
-                    alignItems='center'
+                    alignItems="center"
                 >
                     <Box
                         component="form"
                         display="flex"
                         flexDirection="column"
                         justifyContent="center"
-                        width='70%'
+                        width="70%"
                         onSubmit={handleSubmit(handleFormSubmit)}
                     >
                         <TextField
                             id="name"
                             label="Nombre"
                             sx={{
-                                marginTop: '3%',
-                                bgcolor: 'white',
-                                borderRadius: '20px',
-                                '& .MuiOutlinedInput-root': {
-                                  '& fieldset': {
-                                    border: 'none', // Eliminar el borde del TextField
-                                  },
+                                marginTop: "3%",
+                                bgcolor: "white",
+                                borderRadius: "20px",
+                                "& .MuiOutlinedInput-root": {
+                                    "& fieldset": {
+                                        border: "none",
+                                    },
                                 },
-                                '& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-shrink': {
-                                  transform: 'translate(20px, 0) scale(0.7)', // Ajusta la posición y el tamaño de la etiqueta
+                                "& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-shrink": {
+                                    transform: "translate(20px, 0) scale(0.7)",
                                 },
-                              }}
-                            {...register("username", {
-                                required: "Enter your username",
-                            })}
-                            error={!!errors.username}
-                            helperText={errors.username?.message}
+                            }}
+                            {...register("username")}
                         />
                         <TextField
                             id="email"
                             label="Email"
                             sx={{
-                                marginTop: '3%',
-                                bgcolor: 'white',
-                                borderRadius: '20px',
-                                '& .MuiOutlinedInput-root': {
-                                  '& fieldset': {
-                                    border: 'none', // Eliminar el borde del TextField
-                                  },
+                                marginTop: "3%",
+                                bgcolor: "white",
+                                borderRadius: "20px",
+                                "& .MuiOutlinedInput-root": {
+                                    "& fieldset": {
+                                        border: "none",
+                                    },
                                 },
-                                '& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-shrink': {
-                                  transform: 'translate(20px, 0) scale(0.7)', // Ajusta la posición y el tamaño de la etiqueta
+                                "& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-shrink": {
+                                    transform: "translate(20px, 0) scale(0.7)",
                                 },
-                              }}
-                            {...register("email", {
-                                required: "Ingrese su email",
-                                pattern: {
-                                    value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-                                    message: "Enter a valid email",
-                                },
-                            })}
-                            error={!!errors.email}
-                            helperText={errors.email?.message}
+                            }}
+                            {...register("email")}
                         />
                         <TextField
                             label="Contraseña"
                             id="password"
                             type={showPassword ? "text" : "password"}
                             sx={{
-                                marginTop: '3%',
-                                bgcolor: 'white',
-                                borderRadius: '20px',
-                                '& .MuiOutlinedInput-root': {
-                                  '& fieldset': {
-                                    border: 'none', // Eliminar el borde del TextField
-                                  },
+                                marginTop: "3%",
+                                bgcolor: "white",
+                                borderRadius: "20px",
+                                "& .MuiOutlinedInput-root": {
+                                    "& fieldset": {
+                                        border: "none",
+                                    },
                                 },
-                                '& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-shrink': {
-                                  transform: 'translate(20px, 0) scale(0.7)', // Ajusta la posición y el tamaño de la etiqueta
+                                "& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-shrink": {
+                                    transform: "translate(20px, 0) scale(0.7)",
                                 },
-                              }}
+                            }}
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
@@ -224,16 +225,12 @@ export default function RegisterPage() {
                                     </InputAdornment>
                                 ),
                             }}
-                            {...register("password", {
-                                required: "Enter your password",
-                            })}
-                            error={!!errors.password}
-                            helperText={errors.password?.message}
+                            {...register("password")}
                         />
                         <Button
                             type="submit"
                             variant="contained"
-                            sx={{ marginTop: '5%', height: '30%', borderRadius: '20px' }}
+                            sx={{ marginTop: "5%", height: "30%", borderRadius: "20px" }}
                         >
                             Registrarse
                         </Button>

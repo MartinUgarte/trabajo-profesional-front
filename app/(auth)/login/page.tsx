@@ -5,38 +5,27 @@ import {
     Button,
     IconButton,
     InputAdornment,
-    Link,
     TextField,
-    ThemeProvider,
-    Typography,
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-// import CustomModal from "@app/CustomModal";
-// import LoadingModal from "@app/LoadingModal";
-import { createTheme } from "@mui/material";
-import '@fontsource/rubik';
+import ErrorModal from "../ErrorModal";
+import LoadingModal from "../LoadingModal";
 
 type FormValues = {
     email: string;
     password: string;
 };
 
-const titleTheme = createTheme({
-    typography: {
-        fontFamily: 'Rubik'
-    },
-});
-
 export default function LoginPage() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [showErrorModal, setShowErrorModal] = useState(false);
+    const [loading, setLoading] = useState(false);  // Estado para el modal de carga
     const [errorText, setErrorText] = useState("");
-    const [showLoading, setShowLoading] = useState(false);
 
     const form = useForm<FormValues>({
         defaultValues: {
@@ -48,8 +37,32 @@ export default function LoginPage() {
     const { register, handleSubmit, formState } = form;
     const { errors } = formState;
 
-    const handleFormSubmit = (formData: FormValues) => {
-        setShowLoading(true);
+    // Función para el delay de 1 segundo
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    const handleFormSubmit = async (formData: FormValues) => {
+        if (!formData.email) {
+            setErrorText("Debe ingresar un email.");
+            setShowErrorModal(true);
+            return;
+        }
+        if (!/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(formData.email)) {
+            setErrorText("El formato del email es incorrecto.");
+            setShowErrorModal(true);
+            return;
+        }
+        if (!formData.password) {
+            setErrorText("Debe ingresar una contraseña.");
+            setShowErrorModal(true);
+            return;
+        }
+
+        // Mostrar el modal de carga
+        setLoading(true);
+
+        // Espera 1 segundo antes de continuar
+        await sleep(1000);
+
         fetch(`http://localhost:8000/login`, {
             method: "POST",
             headers: {
@@ -61,23 +74,30 @@ export default function LoginPage() {
             }),
         })
             .then((res) => {
-                console.log(res);
                 if (res.status == 401) {
-                    setErrorText("User not found");
+                    setErrorText("Usuario o contraseña incorrectos.");
                     setShowErrorModal(true);
-                    setShowLoading(false);
-                } else if (res.status == 200) {
-                    setShowLoading(false);
+                } else if (res.status != 200) {
+                    return res.json().then((data) => {
+                        setErrorText(data.message || "Error desconocido en el servidor.");
+                        setShowErrorModal(true);
+                    });
                 }
                 return res.json();
             })
             .then((data) => {
-                console.log("La data: ", data);
                 if (data.access_token) {
-                    console.log("Got data from login id: ", data);
                     localStorage.setItem("jwtToken", data.access_token);
-                    router.push('../filter' )
+                    router.push('../filter');
                 }
+            })
+            .catch((error) => {
+                setErrorText("El email o la contraseña son incorrectos.");
+                setShowErrorModal(true);
+            })
+            .finally(() => {
+                // Ocultar el modal de carga cuando finalice el fetch
+                setLoading(false);
             });
     };
 
@@ -95,20 +115,17 @@ export default function LoginPage() {
             sx={{
                 backgroundImage: 'url(https://i.imgur.com/2bUXNNG.png)',
                 backgroundRepeat: 'no-repeat',
-                backgroundSize: 'cover' // Cambio para que el degradado se dirija hacia la esquina inferior derecha
+                backgroundSize: 'cover'
             }}
-
         >
-            {/* {showErrorModal && (
-                <CustomModal
-                    open={showErrorModal}
-                    onClick={() => setShowErrorModal(false)}
-                    onClose={() => setShowErrorModal(false)}
-                    text="Usuario o contraseña incorrectos"
-                    buttonText="OK"
-                />
-            )}
-            <LoadingModal open={showLoading} onClose={() => setShowLoading(false)} /> */}
+            <ErrorModal
+                open={showErrorModal}
+                onClose={() => setShowErrorModal(false)}
+                text={errorText}
+            />
+
+            <LoadingModal open={loading} /> 
+
             <Box
                 display="flex"
                 flex="1"
@@ -160,23 +177,15 @@ export default function LoginPage() {
                                 bgcolor: 'white',
                                 borderRadius: '20px',
                                 '& .MuiOutlinedInput-root': {
-                                  '& fieldset': {
-                                    border: 'none', // Eliminar el borde del TextField
-                                  },
+                                    '& fieldset': {
+                                        border: 'none',
+                                    },
                                 },
                                 '& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-shrink': {
-                                  transform: 'translate(20px, 0) scale(0.7)', // Ajusta la posición y el tamaño de la etiqueta
+                                    transform: 'translate(20px, 0) scale(0.7)',
                                 },
-                              }}
-                            {...register("email", {
-                                required: "Enter you email",
-                                pattern: {
-                                    value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-                                    message: "Enter a valid email",
-                                },
-                            })}
-                            error={!!errors.email}
-                            helperText={errors.email?.message}
+                            }}
+                            {...register("email")}
                         />
                         <TextField
                             label="Contraseña"
@@ -187,14 +196,14 @@ export default function LoginPage() {
                                 bgcolor: 'white',
                                 borderRadius: '20px',
                                 '& .MuiOutlinedInput-root': {
-                                  '& fieldset': {
-                                    border: 'none', // Eliminar el borde del TextField
-                                  },
+                                    '& fieldset': {
+                                        border: 'none',
+                                    },
                                 },
                                 '& .MuiInputLabel-root.Mui-focused, & .MuiInputLabel-shrink': {
-                                  transform: 'translate(20px, 0) scale(0.7)', // Ajusta la posición y el tamaño de la etiqueta
+                                    transform: 'translate(20px, 0) scale(0.7)',
                                 },
-                              }}
+                            }}
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position="end">
@@ -208,27 +217,23 @@ export default function LoginPage() {
                                     </InputAdornment>
                                 ),
                             }}
-                            {...register("password", {
-                                required: "Ingresa la contraseña",
-                            })}
-                            error={!!errors.password}
-                            helperText={errors.password?.message}
+                            {...register("password")}
                         />
-                        <Box width='100%' sx={{marginTop: "5%"}} display='flex' flexDirection='row' justifyContent='space-around' alignItems='center'>
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            sx={{ width: '45%', height: '30%', borderRadius: '20px' }}
-                        >
-                            Iniciar sesión
-                        </Button>
-                        <Button
-                        href="../register"
-                        variant="contained"
-                        sx={{ width:'45%', height: '30%', borderRadius: '20px'}}
-                    >
-                        Registrarse
-                    </Button>
+                        <Box width='100%' sx={{ marginTop: "5%" }} display='flex' flexDirection='row' justifyContent='space-around' alignItems='center'>
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                sx={{ width: '45%', height: '30%', borderRadius: '20px' }}
+                            >
+                                Iniciar sesión
+                            </Button>
+                            <Button
+                                href="../register"
+                                variant="contained"
+                                sx={{ width: '45%', height: '30%', borderRadius: '20px' }}
+                            >
+                                Registrarse
+                            </Button>
                         </Box>
                     </Box>
                 </Box>
