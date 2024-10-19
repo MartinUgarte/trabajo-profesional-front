@@ -37,6 +37,8 @@ export type EstacionCercana = {
     estacion: string;
     linea: string;
     distancia: number;
+    lat: number;
+    long: number;
 };
   
 export type Recommendation = {
@@ -50,7 +52,10 @@ export type Recommendation = {
     alquiler: boolean;
     link: string;
     direccion: string;
+    lat: number;
+    long: number;
     expensas: string;
     tipo_moneda_expensas: string;
     estacion_cercana: EstacionCercana[];
+    drive_id: string;
 };

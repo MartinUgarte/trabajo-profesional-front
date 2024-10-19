@@ -1,30 +1,15 @@
 "use client";
 
-import {
-    Box,
-    Card,
-    CardContent,
-    Typography,
-    Button,
-    CardMedia,
-} from "@mui/material";
+import { Box, Card, CardContent, Typography, Button, CardMedia } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Recommendation, EstacionCercana } from "@/app/types";
-
-// Mapeo de imágenes de subtes
-export const subtes_imgs = {
-    "A": "https://emova.com.ar/wp-content/uploads/2021/11/past-a-60.png",
-    "B": "https://emova.com.ar/wp-content/uploads/2021/11/past-b-60.png",
-    "C": "https://emova.com.ar/wp-content/uploads/2021/11/past-c-60.png",
-    "D": "https://emova.com.ar/wp-content/uploads/2021/11/past-d-60.png",
-    "E": "https://emova.com.ar/wp-content/uploads/2021/11/past-e-60.png",
-    "H": "https://emova.com.ar/wp-content/uploads/2021/11/past-h-60.png",
-};
+import { Recommendation } from "@/app/types";
+import PropertyCard from "./PropertyCard";
 
 export default function Recommendations() {
     const router = useRouter();
     const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+    const [images, setImages] = useState<{ [key: string]: string[] }>({});
 
     const getRecommendations = () => {
         let recos = localStorage.getItem('recommendations');
@@ -32,16 +17,48 @@ export default function Recommendations() {
             return;
         }
         setRecommendations(JSON.parse(recos));
+        console.log('RECOMMENDATIONS A: ', JSON.parse(recos));
+    };
+
+    const apiKey = 'AIzaSyAfPFEbgK7iwpufDlShVKoGKrwQqkXElww';
+
+    const fetchPropertyImages = async (property_folder_id: string) => {
+        try {
+            const response = await fetch(`https://www.googleapis.com/drive/v3/files?q='${property_folder_id}'+in+parents&key=${apiKey}&fields=files(id,name,mimeType)`);
+            const data = await response.json();
+            const imageLinks = data.files
+                .filter(file => file.mimeType.startsWith('image/'))
+                .map(file => `${file.id}`); // Enlace directo a la imagen
+            if (property_folder_id == '161W2uA7kqcGkpzxcrHihvrWmSoPZQxBK') { 
+                console.log('SOY VERA AL 100', imageLinks);
+            }
+            return imageLinks;
+        } catch (error) {
+            console.error('Error al cargar imágenes:', error);
+        }
     };
 
     useEffect(() => {
         getRecommendations();
-    }, []);
+    }, []); // Este solo corre al montar el componente
 
-    // Función para formatear el precio
-    const formatPrice = (price: string) => {
-        return new Intl.NumberFormat('es-AR').format(parseInt(price));
-    };
+    useEffect(() => {
+        const fetchImagesForRecommendations = async () => {
+            for (const recommendation of recommendations) {
+                if (recommendation.drive_id != undefined) {
+                    const propertyImages = await fetchPropertyImages(recommendation.drive_id);
+                    setImages(prevImages => ({
+                        ...prevImages,
+                        [recommendation.id]: propertyImages
+                    }));
+                }
+            }
+        };
+
+        if (recommendations.length > 0) {
+            fetchImagesForRecommendations();
+        }
+    }, [recommendations]); 
 
     return (
         <Box
@@ -49,85 +66,45 @@ export default function Recommendations() {
             flexDirection="column"
             alignItems="center"
             justifyContent="center"
-            sx={{ bgcolor: '#f5f5f5', padding: '2%', height: '100vh', overflow: 'hidden' }}
+            sx={{
+                bgcolor: '#f5f5f5',
+                padding: '2%',
+                height: '100vh',
+                overflow: 'hidden',
+                backgroundImage: 'linear-gradient(45deg, rgba(33, 150, 243, 0.6) 30%, rgba(33, 203, 243, 0.2) 90%), url(https://i.imgur.com/2bUXNNG.png)',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: 'cover',
+            }}
         >
             <Box 
                 sx={{ 
-                    height: '70vh', 
+                    height: '80vh', 
                     overflowY: 'scroll', 
                     width: '100%', 
-                    maxWidth: '70%', 
+                    maxWidth: '90%', 
                     padding: '2%',
-                    mt: '4%'
+                    '&::-webkit-scrollbar': {
+                        width: '12px',
+                    },
+                    '&::-webkit-scrollbar-track': {
+                        background: 'rgba(255, 255, 255, 0.3)',
+                        borderRadius: '10px',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                        background: 'rgba(0, 92, 179, 0.7)', // Color del pulgar de la barra
+                        borderRadius: '10px',
+                    },
+                    '&::-webkit-scrollbar-thumb:hover': {
+                        background: 'rgba(0, 92, 179, 1)', // Color del pulgar al pasar el ratón
+                    },
                 }}
             >
                 {recommendations.map((recommendation) => (
                     <Box key={recommendation.id} sx={{ marginBottom: '3%' }}>
-                        <Card sx={{ display: 'flex', maxHeight: '30%' }}>
-                            {/* Imagen de la propiedad */}
-                            <CardMedia
-                                component="img"
-                                sx={{ width: '20%' }}
-                                image="https://drive.google.com/uc?id=1--Tq4KABUf1aLSXIFRHVBiZvmaZ-JK21"
-                                alt="Imagen de propiedad"
-                            />
-                            
-                            {/* Contenido de la Card con flex para dividir */}
-                            <Box sx={{ display: 'flex', flex: 1 }}>
-                                <CardContent sx={{ flex: 1, display: 'flex' }}>
-                                    
-                                    {/* Información de la propiedad (lado izquierdo) */}
-                                    <Box sx={{ flex: 1, paddingRight: '2%' }}>
-                                        <Typography component="div" variant="h6">
-                                            ${formatPrice(recommendation.precio)}
-                                        </Typography>
-                                        <Typography variant="subtitle1" color="text.secondary" component="div">
-                                            {recommendation.direccion}
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary" component="div">
-                                            {recommendation.m2} m² - {recommendation.ambientes} ambientes
-                                        </Typography>
-                                        <Button 
-                                            variant="contained" 
-                                            sx={{ marginTop: '1%' }}
-                                            onClick={() => router.push(recommendation.link)}
-                                        >
-                                            Ver más detalles
-                                        </Button>
-                                    </Box>
-
-                                    {/* Estaciones cercanas (lado derecho) */}
-                                    <Box sx={{ flex: 1 }}>
-                                        {recommendation.estacion_cercana.length > 0 && (
-                                            <Box>
-                                                <Typography variant="body2" color="text.primary" component="div" sx={{ marginBottom: '1%' }}>
-                                                    Estaciones cercanas:
-                                                </Typography>
-                                                {recommendation.estacion_cercana.map((estacion: EstacionCercana, index) => (
-                                                    <Box key={index} display="flex" alignItems="center">
-                                                        {/* Imagen de la línea de subte */}
-                                                        {subtes_imgs[estacion.linea] && (
-                                                            <img 
-                                                                src={subtes_imgs[estacion.linea]} 
-                                                                alt={`Línea ${estacion.linea}`} 
-                                                                style={{ width: '5%', height: 'auto', marginRight: '2%' }} 
-                                                            />
-                                                        )}
-                                                        <Typography 
-                                                            variant="body2" 
-                                                            color="text.secondary" 
-                                                            component="div"
-                                                        >
-                                                            {estacion.estacion} ({estacion.distancia} metros)
-                                                        </Typography>
-                                                    </Box>
-                                                ))}
-                                            </Box>
-                                        )}
-                                    </Box>
-                                </CardContent>
-                            </Box>
-                        </Card>
+                        <PropertyCard
+                            recommendation={recommendation}
+                            images={images}
+                        />
                     </Box>
                 ))}
             </Box>

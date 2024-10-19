@@ -230,7 +230,23 @@ export default function RegisterPage() {
                         <Button
                             type="submit"
                             variant="contained"
-                            sx={{ marginTop: "5%", height: "30%", borderRadius: "20px" }}
+                            sx={{
+                                background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)', // Gradiente azul
+                                borderRadius: '20px',  // Bordes redondeados
+                                padding: '5px 15px',  // Tamaño del botón más pequeño
+                                color: 'white',  // Texto blanco para contraste
+                                fontWeight: 'bold',  // Texto en negrita
+                                mt: '5%',
+                                height: '30%',
+                                fontSize: '1rem', // Tamaño de fuente más pequeño (puedes ajustar según prefieras)
+                                boxShadow: '0 2px 4px 2px rgba(33, 203, 243, .3)',  // Sombra suave
+                                transition: 'transform 0.2s, box-shadow 0.2s',  // Transiciones suaves para el hover
+                                '&:hover': {
+                                    backgroundColor: '#1976D2',  // Color de fondo más oscuro al pasar el cursor
+                                    boxShadow: '0 4px 8px 2px rgba(33, 203, 243, .5)',  // Sombra más intensa en hover
+                                    transform: 'scale(1.05)',  // Efecto de agrandamiento
+                                },
+                            }}
                         >
                             Registrarse
                         </Button>

@@ -4,7 +4,6 @@ import * as React from 'react';
 import Link from 'next/link';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
@@ -23,7 +22,6 @@ import Badge from '@mui/material/Badge/Badge';
 import { createContext, useEffect, useState } from 'react';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
 
-
 const DRAWER_WIDTH = 240;
 
 const LINKS = [
@@ -39,13 +37,15 @@ const PLACEHOLDER_LINKS = [
     { text: 'Cerrar Sesión', href: '/login', icon: LogoutIcon },
 ];
 
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 
     return (
         <html lang="en">
             <body>
-                <AppBar position="fixed" sx={{ zIndex: 2000 }}>
+                <AppBar position="fixed" sx={{ 
+                    zIndex: 2000, 
+                    background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)' // Gradiente azul
+                }}>
                     <Toolbar>
                         <Box
                             component="img"
@@ -67,6 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     sx={{
                         flexGrow: 1,
                         bgcolor: 'background.default',
+                        paddingTop: '64px'
                     }}
                 >
                     {children}
