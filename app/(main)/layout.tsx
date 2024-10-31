@@ -1,19 +1,12 @@
 "use client";
 
 import * as React from 'react';
-import Link from 'next/link';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import GroupsIcon from '@mui/icons-material/Groups';
+import Typography from '@mui/material/Typography'
 import LogoutIcon from '@mui/icons-material/Logout';
+import GroupsIcon from '@mui/icons-material/Groups';
 import PersonIcon from '@mui/icons-material/Person2';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -21,6 +14,7 @@ import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
 import Badge from '@mui/material/Badge/Badge';
 import { createContext, useEffect, useState } from 'react';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
+import Link from 'next/link';
 
 const DRAWER_WIDTH = 240;
 
@@ -42,8 +36,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     return (
         <html lang="en">
             <body>
-                <AppBar position="fixed" sx={{ 
-                    zIndex: 2000, 
+                <AppBar position="fixed" sx={{
+                    zIndex: 2000,
                     background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)' // Gradiente azul
                 }}>
                     <Toolbar>
@@ -60,6 +54,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         <Typography variant="h6" noWrap component="div" color="white" sx={{ marginTop: 0.5 }}>
                             Propia
                         </Typography>
+                        <Box sx={{ flexGrow: 1 }} /> {/* Espacio flexible para empujar el icono a la derecha */}
+                        <Link href="/login" passHref>
+                            <Box
+                                sx={{
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    transition: 'transform 0.3s ease', // Transición suave
+                                    '&:hover': {
+                                        transform: 'scale(1.2)', // Aumenta el tamaño al 120%
+                                    },
+                                }}
+                            >
+                                <LogoutIcon sx={{ color: 'white', fontSize: 30 }} />
+                            </Box>
+                        </Link>
                     </Toolbar>
                 </AppBar>
                 <Box

@@ -31,7 +31,7 @@ export default function PropertyCard({ recommendation, images }: PropertyCardPro
     };
 
     return (
-        <Card sx={{ display: 'flex', maxHeight: '30%' }}>
+        <Card sx={{ display: 'flex', height: '20%' }}>
             {/* Imagen de la propiedad */}
             <CardMedia
                 component="img"
@@ -61,6 +61,9 @@ export default function PropertyCard({ recommendation, images }: PropertyCardPro
                         </Typography>
                         <Typography variant="body2" color="text.secondary" component="div">
                             {recommendation.m2} m² - {recommendation.ambientes} ambientes
+                        </Typography>
+                        <Typography sx={{mt: '2%', color: '#00abe4'}} variant="body1" color="text.secondary" component="div">
+                            {Math.round(recommendation._final_rating / 5 * 100)}% match 
                         </Typography>
                         <Button
                             variant="contained"

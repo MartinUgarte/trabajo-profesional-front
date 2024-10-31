@@ -73,10 +73,22 @@ export default function Filter() {
         if (!jwtToken) {
             return;
         }
-        
+
         setLoading(true);
 
         await sleep(1000);
+
+        let user_pref = localStorage.getItem("preferences")
+        if (!user_pref) {
+            return;
+        }
+
+        let preferences = JSON.parse(user_pref);
+        preferences.lugares_frecuentados = frequentedPlaces;
+
+        if (frequentedPlaces.length > 0) {
+            localStorage.setItem("preferences", JSON.stringify(preferences));
+        }
 
         fetch(`http://localhost:8000/hybrid/recommend`, {
             method: "POST",
@@ -89,26 +101,13 @@ export default function Filter() {
                 collab: {
                     user_id: 1
                 },
-                kbrs: {
-                    //tipo_propiedad: localStorage.getItem("propertyType"),
-                    // cochera: localStorage.getItem("hasGarage"),
-                    // m2_min: localStorage.getItem("minArea"),
-                    // m2_max: localStorage.getItem("maxArea"),
-                    // m2: localStorage.getItem("area"),
-                    ambientes_min: localStorage.getItem("minRooms"),
-                    ambientes_max: localStorage.getItem("maxRooms"),
-                    // precio_min: localStorage.getItem("minPrice"),
-                    // precio_max: localStorage.getItem("maxPrice"),
-                    // alquiler: localStorage.getItem("rental"),
-                    // tipo_moneda: localStorage.getItem("currency"),
-                    lugares_frecuentados: frequentedPlaces
-
-                }
+                kbrs: preferences
             }),
         })
             .then((res) => res.json())
             .then((data) => {
-                localStorage.setItem("recommendations", JSON.stringify(data));
+                localStorage.setItem("recommendations", JSON.stringify(data.recommendations));
+                localStorage.setItem("totalCount", data.total_count);
                 localStorage.setItem("frequentedPlaces", JSON.stringify(frequentedPlaces));
                 router.push('../recommendations');
             })
@@ -155,7 +154,7 @@ export default function Filter() {
 
             <Box width='100%' flexDirection='column' justifyContent='center' alignItems='center' height='100%' display='flex' flex='1' >
 
-                <Box display='flex' flex='0.7' width='50%' height='100%' justifyContent='center' flexDirection='column' p={3} boxShadow={3} borderRadius={2} bgcolor="white" sx={{ mt: '5%' }}>
+                <Box display='flex' flex='0.7' width='50%' height='100%' justifyContent='center' flexDirection='column' p={3} boxShadow={3} borderRadius={5} bgcolor="white" sx={{ mt: '5%' }}>
                     <Box flexDirection='column' display='flex' flex='0.2'>
                         <Typography sx={{ alignSelf: 'center', fontFamily: 'Rubik', fontSize: '2.5rem', color: 'black', fontWeight: 'bold' }} variant="h4" gutterBottom>
                             ¡Ya falta poco!
@@ -164,17 +163,19 @@ export default function Filter() {
                             ¿Qué lugares frecuentás?
                         </Typography>
                     </Box>
-                    <Box display='flex' flex='0.7' flexDirection='column' alignItems='center' sx={{ maxHeight: '120px', overflowY: 'auto', paddingTop: '2%', '&::-webkit-scrollbar': {
-        width: '8px', // Cambia el ancho de la barra de desplazamiento
-      },
-      '&::-webkit-scrollbar-thumb': {
-        backgroundColor: '#005b96', // Cambia el color del pulgar de la barra de desplazamiento
-        borderRadius: '10px', // Bordes redondeados para el pulgar
-      },
-      '&::-webkit-scrollbar-track': {
-        backgroundColor: 'rgba(255, 255, 255, 0.3)', // Cambia el color del track
-        borderRadius: '10px', // Bordes redondeados para el track
-      }, }}>
+                    <Box display='flex' flex='0.7' flexDirection='column' alignItems='center' sx={{
+                        maxHeight: '190px', overflowY: 'auto', paddingTop: '5%', '&::-webkit-scrollbar': {
+                            width: '8px', // Cambia el ancho de la barra de desplazamiento
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                            backgroundColor: '#005b96', // Cambia el color del pulgar de la barra de desplazamiento
+                            borderRadius: '10px', // Bordes redondeados para el pulgar
+                        },
+                        '&::-webkit-scrollbar-track': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.3)', // Cambia el color del track
+                            borderRadius: '10px', // Bordes redondeados para el track
+                        },
+                    }}>
                         {frequentedPlaces.map((place, index) => (
                             <Box key={index} display="flex" alignItems="center" sx={{ width: '90%', marginBottom: 2 }}>
                                 <TextField

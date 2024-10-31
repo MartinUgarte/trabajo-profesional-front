@@ -1,23 +1,47 @@
 "use client";
 
-import { Box, Card, CardContent, Typography, Button, CardMedia } from "@mui/material";
+import { Box, Card, CardContent, Typography, Button, CardMedia, CircularProgress } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Recommendation } from "@/app/types";
+import { Preferences, Recommendation } from "@/app/types";
 import PropertyCard from "./PropertyCard";
+import SquareFootIcon from '@mui/icons-material/SquareFoot';
+import KingBedIcon from '@mui/icons-material/KingBed';
+import ApartmentIcon from '@mui/icons-material/Apartment';
+import SellIcon from '@mui/icons-material/Sell';
+import DriveEtaIcon from '@mui/icons-material/DriveEta';
+import PlaceIcon from '@mui/icons-material/Place';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 
 export default function Recommendations() {
     const router = useRouter();
     const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+    const [totalCount, setTotalCount] = useState<string>('');
+    const [preferences, setPreferences] = useState<Preferences>({});
     const [images, setImages] = useState<{ [key: string]: string[] }>({});
+    const [loading, setLoading] = useState<boolean>(false);
 
     const getRecommendations = () => {
         let recos = localStorage.getItem('recommendations');
+        console.log('recos', recos)
         if (!recos) {
             return;
         }
         setRecommendations(JSON.parse(recos));
-        console.log('RECOMMENDATIONS A: ', JSON.parse(recos));
+
+        let totalCount = localStorage.getItem('totalCount');
+        if (!totalCount) {
+            return;
+        }
+        setTotalCount(totalCount);
+
+        let preferences = localStorage.getItem('preferences');
+        if (!preferences) {
+            return;
+        }
+        setPreferences(JSON.parse(preferences));
+
+        console.log('preferences', preferences);
     };
 
     const apiKey = 'AIzaSyAfPFEbgK7iwpufDlShVKoGKrwQqkXElww';
@@ -29,7 +53,7 @@ export default function Recommendations() {
             const imageLinks = data.files
                 .filter(file => file.mimeType.startsWith('image/'))
                 .map(file => `${file.id}`); // Enlace directo a la imagen
-            if (property_folder_id == '161W2uA7kqcGkpzxcrHihvrWmSoPZQxBK') { 
+            if (property_folder_id == '161W2uA7kqcGkpzxcrHihvrWmSoPZQxBK') {
                 console.log('SOY VERA AL 100', imageLinks);
             }
             return imageLinks;
@@ -58,7 +82,49 @@ export default function Recommendations() {
         if (recommendations.length > 0) {
             fetchImagesForRecommendations();
         }
-    }, [recommendations]); 
+    }, [recommendations]);
+
+    const handleResearch = async () => {
+        let jwtToken = localStorage.getItem('jwtToken');
+        if (!jwtToken) {
+            return;
+        }
+
+        let preferences = localStorage.getItem("preferences")
+        if (!preferences) {
+            return;
+        }
+
+        setLoading(true)
+        fetch(`http://localhost:8000/hybrid/recommend`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${jwtToken}`
+            },
+
+            body: JSON.stringify({
+                collab: {
+                    user_id: 1
+                },
+                kbrs: JSON.parse(preferences)
+            }),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                console.log('obtuve: ', data)
+                localStorage.setItem("recommendations", JSON.stringify(data.recommendations));
+                localStorage.setItem("totalCount", data.total_count);
+                getRecommendations();
+            })
+            .catch((error) => {
+                console.error("Error fetching recommendations:", error);
+            })
+            .finally(() => {
+                // Ocultar modal de carga
+                setLoading(false);
+            });
+    };
 
     return (
         <Box
@@ -76,12 +142,96 @@ export default function Recommendations() {
                 backgroundSize: 'cover',
             }}
         >
-            <Box 
-                sx={{ 
-                    height: '80vh', 
-                    overflowY: 'scroll', 
-                    width: '100%', 
-                    maxWidth: '90%', 
+            <Box width='90%' height='10%' display='flex' flexDiction='row' justifyContent='center' alignItems='center'>
+                <Box
+                    width='10%' height='100%' display='flex' flex='0.9' flexDiction='row' justifyContent='center' alignItems='center'
+                    sx={{
+                        mb: '1%',
+                        cursor: 'pointer',
+                        boxShadow: '0 6px 15px rgba(0, 0, 0, 0.2)',
+                        transition: 'transform 0.3s, box-shadow 0.3s',
+                        '&:hover': {
+                            transform: 'scale(1.02)',
+                        },
+                    }}
+                    onClick={() => router.push('/filter')}
+                >
+                    <Box flex='0.7' display='flex' flexDirection='row' width='100%' height='100%' justifyContent='space-between' alignItems='center'>
+                        <Box sx={{ textAlign: 'center', ml: '4%' }}>
+                            <ApartmentIcon fontSize="large" />
+                            <Typography>
+                                {preferences.tipo_propiedad ? preferences.tipo_propiedad : '-'}
+                            </Typography>
+                        </Box>
+                        <Box sx={{ textAlign: 'center' }}>
+                            <SellIcon fontSize="large" />
+                            <Typography>{preferences.alquiler ? 'alquiler' : 'venta'}</Typography>
+                        </Box>
+                        <Box sx={{ textAlign: 'center' }}>
+                            <KingBedIcon fontSize="large" />
+                            <Typography>
+                                {preferences.ambientes_min && preferences.ambientes_max
+                                    ? `${preferences.ambientes_min} - ${preferences.ambientes_max} ambientes`
+                                    : preferences.ambientes_min
+                                        ? `> ${preferences.ambientes_min} ambientes`
+                                        : preferences.ambientes_max
+                                            ? `< ${preferences.ambientes_max} ambientes`
+                                            : '-'}
+                            </Typography>
+                        </Box>
+                        <Box sx={{ textAlign: 'center'}}>
+                            <SquareFootIcon fontSize="large" />
+                            <Typography>
+                                {preferences.m2_min && preferences.m2_max
+                                    ? `${preferences.m2_min} - ${preferences.m2_max} m2`
+                                    : preferences.m2_min
+                                        ? `> ${preferences.m2_min} m2`
+                                        : preferences.m2_max
+                                            ? `< ${preferences.m2_max} m2`
+                                            : '-'}
+                            </Typography>
+                        </Box>
+                        <Box sx={{ textAlign: 'center' }}>
+                            <DriveEtaIcon fontSize="large" />
+                            <Typography>{preferences.cochera ? 'con cochera' : 'sin cochera'}</Typography>
+                        </Box>
+                        <Box sx={{ textAlign: 'center'}}>
+                            <PlaceIcon fontSize="large" />
+                            <Typography>cerca de {preferences.lugares_frecuentados?.join(', ')}</Typography>
+                        </Box>
+                    </Box>
+
+                    <Box flex='0.3' display='flex' flexDirection='row' alignItmes='center' justifyContent='center'>
+                        <Typography sx={{ mr: '2%', alignSelf: 'center', alignContent: 'center' }}>¡Se han encontrado</Typography>
+                        <Typography sx={{ mr: '2%', alignSelf: 'center', alignContent: 'center', color: '#21C1F3' }} variant='h5'>{totalCount}</Typography>
+                        <Typography sx={{ alignSelf: 'center', alignContent: 'center' }}>propiedades!</Typography>
+                    </Box>
+                </Box>
+                <Box
+                    width='10%' height='100%' display='flex' flex='0.1'
+                    sx={{
+                        textAlign: 'center',
+                        cursor: 'pointer',
+                        transition: 'transform 0.3s ease', // Transición suave
+                        '&:hover': {
+                            transform: 'scale(1.2)', // Aumenta el tamaño al 120%
+                        },
+                    }}
+                    justifyContent='center'
+                    alignItems='center'
+                    onClick={() => handleResearch()}
+                >
+                    <RestartAltIcon fontSize="large" />
+                </Box>
+            </Box>
+
+
+            <Box
+                sx={{
+                    height: '80vh',
+                    overflowY: 'scroll',
+                    width: '100%',
+                    maxWidth: '90%',
                     padding: '2%',
                     '&::-webkit-scrollbar': {
                         width: '12px',
@@ -99,14 +249,50 @@ export default function Recommendations() {
                     },
                 }}
             >
-                {recommendations.map((recommendation) => (
-                    <Box key={recommendation.id} sx={{ marginBottom: '3%' }}>
-                        <PropertyCard
-                            recommendation={recommendation}
-                            images={images}
-                        />
+                {loading ? ( // Mostrar CircularProgress mientras se carga
+                    <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+                        <Box
+                    sx={{
+                        position: 'relative',
+                        display: 'inline-flex', // Esto permite superponer el CircularProgress sobre la imagen
+                    }}
+                >
+                    {/* Imagen que será rodeada */}
+                    <Box
+                        component="img"
+                        src="https://i.imgur.com/wE0iUm5.png" // Aquí va tu imagen
+                        alt="Loading Image"
+                        sx={{
+                            width: 100, // Puedes ajustar el tamaño de la imagen
+                            height: 100,
+                            borderRadius: '50%', // Si quieres que sea circular
+                        }}
+                    />
+
+                    {/* CircularProgress que rodea la imagen */}
+                    <CircularProgress
+                        size={120} // Asegúrate de que el size sea un poco más grande que la imagen para que la rodee
+                        sx={{
+                            position: 'absolute',
+                            top: '-10px', // Ajusta la posición si es necesario
+                            left: '-10px',
+                            zIndex: 1, // Asegura que el CircularProgress esté sobre la imagen
+                        }}
+                    />
+                </Box>
                     </Box>
-                ))}
+                ) : (
+                    recommendations.length > 0 &&
+                    recommendations.map((recommendation) => (
+                        <Box key={recommendation.id} sx={{ marginBottom: '3%' }}>
+                            <PropertyCard
+                                recommendation={recommendation}
+                                images={images}
+                            />
+                        </Box>
+                    ))
+                )}
+
             </Box>
         </Box>
     );

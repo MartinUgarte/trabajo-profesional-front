@@ -4,16 +4,16 @@ import React, { useEffect, useState } from 'react';
 import { Box, Typography, Paper, Button, IconButton } from '@mui/material';
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import SquareFootIcon from '@mui/icons-material/SquareFoot';
 import KingBedIcon from '@mui/icons-material/KingBed';
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import SellIcon from '@mui/icons-material/Sell';
-import GarageIcon from '@mui/icons-material/Garage';
+import DriveEtaIcon from '@mui/icons-material/DriveEta';
 import StarIcon from '@mui/icons-material/Star';
 import DirectionsSubwayIcon from '@mui/icons-material/DirectionsSubway';
-import { Recommendation } from '@/app/types';
+import { Recommendation, LugarFrecuentado } from '@/app/types';
 import L from 'leaflet';
 import RatingModal from './RatingModal';
 import LoadingModal from '@/app/(auth)/LoadingModal';
@@ -44,7 +44,14 @@ const iconButtonStyles = {
 export default function RecommendationDetail() {
     const [recommendation, setRecommendation] = useState<Recommendation>({});
     const [images, setImages] = useState<string[]>(['https://i.imgur.com/XyVJU8I.png']);
-    const [lugaresFrecuentados, setLugaresFrecuentados] = useState<{ direccion: string; lat: number; long: number }[]>([]);
+    const [lugaresFrecuentados, setLugaresFrecuentados] = useState<LugarFrecuentado[]>([{
+        direccion: '',
+        longitud: 0,
+        id: 0,
+        user_id: 0,
+        latitud: 0,
+        estacion_cercana: 0
+    }]);
     const [modalOpen, setModalOpen] = useState(false);
     const [loading, setLoading] = useState(false); // Estado de carga
 
@@ -77,6 +84,32 @@ export default function RecommendationDetail() {
         popupAnchor: [0, -32],
     });
 
+    const getFrequentedPlaces = async () => {
+        let jwtToken = localStorage.getItem('jwtToken');
+        if (!jwtToken) {
+            return;
+        }
+
+        setLoading(true);
+
+        fetch(`http://localhost:8000/frequented-places`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": 'Bearer ' + jwtToken,
+            },
+        }).then((res) => {
+
+            return res.json();
+        })
+            .then((data) => {
+                console.log('lugares frec: ', data)
+                setLugaresFrecuentados(data);
+            })
+
+        setLoading(false)
+    }
+
     const getRecommendation = () => {
         let reco = localStorage.getItem('property');
         let recoImages = localStorage.getItem('propertyImages');
@@ -101,33 +134,7 @@ export default function RecommendationDetail() {
 
     useEffect(() => {
         getRecommendation();
-
-        const fetchFrequentedPlaces = async () => {
-            const storedPlaces = localStorage.getItem('frequentedPlaces');
-            if (!storedPlaces) {
-                return;
-            }
-
-            const parsedPlaces: string[] = JSON.parse(storedPlaces);
-            const initialPlaces = parsedPlaces.map((direccion) => ({
-                direccion,
-                lat: 0,
-                long: 0
-            }));
-
-            setLugaresFrecuentados(initialPlaces);
-
-            const updatedPlaces = await Promise.all(
-                initialPlaces.map(async (place) => {
-                    const coordinates = await geocodeAddress(place.direccion);
-                    return coordinates ? { ...place, ...coordinates } : place;
-                })
-            );
-
-            setLugaresFrecuentados(updatedPlaces);
-        };
-
-        fetchFrequentedPlaces();
+        getFrequentedPlaces();
     }, []);
 
     useEffect(() => {
@@ -153,40 +160,40 @@ export default function RecommendationDetail() {
         }}>
             <Box sx={{ display: 'flex', gap: 2 }}>
                 <Paper elevation={3} sx={{ width: '60%' }}>
-                <Carousel showThumbs={false} showStatus={false} dynamicHeight>
-    {recommendation.drive_id == null ? (
-        // Envolviendo el elemento en un array
-        [ 
-            <div key="null-image"> {/* Agregando un key para evitar warnings */}
-                <img
-                    src={'https://i.imgur.com/XyVJU8I.png'}
-                    alt={`Imagen null`}
-                    style={{
-                        width: '100%',
-                        height: 'auto',
-                        maxHeight: '400px',
-                        objectFit: 'cover',
-                    }}
-                />
-            </div>
-        ]
-    ) : (
-        images.map((src, index) => (
-            <div key={index}>
-                <img
-                    src={`https://drive.google.com/thumbnail?id=${src}&sz=w2000`}
-                    alt={`Imagen ${index + 1}`}
-                    style={{
-                        width: '100%',
-                        height: 'auto',
-                        maxHeight: '400px',
-                        objectFit: 'cover',
-                    }}
-                />
-            </div>
-        ))
-    )}
-</Carousel>
+                    <Carousel showThumbs={false} showStatus={false} dynamicHeight>
+                        {recommendation.drive_id == null ? (
+                            // Envolviendo el elemento en un array
+                            [
+                                <div key="null-image"> {/* Agregando un key para evitar warnings */}
+                                    <img
+                                        src={'https://i.imgur.com/XyVJU8I.png'}
+                                        alt={`Imagen null`}
+                                        style={{
+                                            width: '100%',
+                                            height: 'auto',
+                                            maxHeight: '400px',
+                                            objectFit: 'cover',
+                                        }}
+                                    />
+                                </div>
+                            ]
+                        ) : (
+                            images.map((src, index) => (
+                                <div key={index}>
+                                    <img
+                                        src={`https://drive.google.com/thumbnail?id=${src}&sz=w1000`}
+                                        alt={`Imagen ${index + 1}`}
+                                        style={{
+                                            width: '100%',
+                                            height: 'auto',
+                                            maxHeight: '400px',
+                                            objectFit: 'cover',
+                                        }}
+                                    />
+                                </div>
+                            ))
+                        )}
+                    </Carousel>
 
                 </Paper>
 
@@ -195,8 +202,8 @@ export default function RecommendationDetail() {
                     <Box sx={{ marginBottom: 2 }}>
                         <Box display='flex' flexDirection='row' width='100%' alignItems='center'>
                             <Box display='flex' flexDirection='column' justifyContent='flex-start' flex='0.7' alignItems='flex-start'>
-                                <Box display='flex' flex='0.5' flexDirection='row' alignItems='flex-start'>
-                                    <Typography sx={{ mr: '5%' }} component="div" variant="h6">
+                                <Box display='flex' flex='0.5' flexDirection='row' alignItems='flex-end'>
+                                    <Typography sx={{ fontWeight: 'bold', color: '#1976d2', mr: '5%' }} component="div" variant="h4">
                                         ${formatPrice(recommendation.precio)}
                                     </Typography>
                                     <Typography sx={{ color: 'grey' }} component="div" variant="h6">
@@ -222,30 +229,44 @@ export default function RecommendationDetail() {
                         <Typography variant="h6" sx={{ fontSize: '1rem' }}>{recommendation.direccion}</Typography>
                     </Box>
 
-                    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
+                    <Box sx={{ mt: '6%', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
                         <Box sx={{ textAlign: 'center' }}>
                             <ApartmentIcon fontSize="large" />
                             <Typography>{recommendation.tipo_propiedad}</Typography>
                         </Box>
                         <Box sx={{ textAlign: 'center' }}>
                             <SellIcon fontSize="large" />
-                            <Typography>{recommendation.alquiler ? 'Alquiler' : 'Venta'}</Typography>
+                            <Typography>{recommendation.alquiler ? 'alquiler' : 'venta'}</Typography>
                         </Box>
                         <Box sx={{ textAlign: 'center' }}>
                             <KingBedIcon fontSize="large" />
-                            <Typography>{recommendation.cant_dormitorios}</Typography>
+                            <Typography>{recommendation.ambientes} ambientes</Typography>
                         </Box>
                         <Box sx={{ textAlign: 'center' }}>
                             <SquareFootIcon fontSize="large" />
-                            <Typography>{recommendation.metros_cuadrados}</Typography>
+                            <Typography>{recommendation.m2} m2</Typography>
                         </Box>
                         <Box sx={{ textAlign: 'center' }}>
-                            <GarageIcon fontSize="large" />
-                            <Typography>{recommendation.cant_garages}</Typography>
+                            <DriveEtaIcon fontSize="large" />
+                            <Typography>{recommendation.cochera ? 'Con cochera' : 'Sin cochera'}</Typography>
                         </Box>
                         <Box sx={{ textAlign: 'center' }}>
                             <DirectionsSubwayIcon fontSize="large" />
-                            <Typography>{recommendation.lineas_subte}</Typography>
+                            {Array.isArray(recommendation.estacion_cercana) && recommendation.estacion_cercana.length > 0 ? (
+                                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1 }}>
+                                    {Array.from(new Set(recommendation.estacion_cercana.map(estacion => estacion.linea))).map((linea, index) => (
+                                        <img
+                                            key={index}
+                                            src={subtes_imgs[linea]} // Imagen correspondiente a la línea
+                                            alt={`Línea ${linea}`}
+                                            style={{ height: '24px', width: '24px', marginBottom: '5px' }} // Tamaño más pequeño
+                                        />
+                                    ))}
+                                </Box>
+                            ) : (
+                                <Typography variant="caption">No hay estaciones cercanas</Typography>
+                            )}
+
                         </Box>
                     </Box>
                 </Paper>
@@ -262,31 +283,53 @@ export default function RecommendationDetail() {
                             <Popup>{recommendation.direccion}</Popup>
                         </Marker>
 
+                        {/* Renderiza los lugares frecuentados y sus estaciones cercanas */}
                         {lugaresFrecuentados.map((lugar, index) => (
-                            lugar.lat !== 0 && lugar.long !== 0 && (
-                                <Marker key={index} position={[lugar.lat, lugar.long]} icon={starIcon}>
-                                    <Popup>{lugar.direccion}</Popup>
-                                </Marker>
+                            lugar.latitud !== 0 && lugar.longitud !== 0 && (
+                                <React.Fragment key={`lugar-${index}`}>
+                                    <Marker position={[lugar.latitud, lugar.longitud]} icon={starIcon}>
+                                        <Popup>{lugar.direccion}</Popup>
+                                    </Marker>
+
+                                    {lugar.estaciones_cercanas && lugar.estaciones_cercanas.map((estacion, estacionIndex) => (
+                                        <Marker
+                                            key={`estacion-${index}-${estacionIndex}`}
+                                            position={[estacion.lat, estacion.long]}
+                                            icon={new L.Icon({
+                                                iconUrl: subtes_imgs[estacion.linea],
+                                                iconSize: [32, 32],
+                                                iconAnchor: [16, 32],
+                                                popupAnchor: [0, -32],
+                                            })}
+                                        >
+                                            <Popup>{estacion.estacion} - {Math.round(estacion.distancia)} m</Popup>
+                                        </Marker>
+                                    ))}
+                                </React.Fragment>
                             )
                         ))}
 
+
                         {/* Mapeo de las estaciones cercanas */}
                         {recommendation.estacion_cercana?.map((estacion, index) => (
-                            <Marker
-                                key={index}
-                                position={[estacion.lat, estacion.long]}
-                                icon={new L.Icon({
-                                    iconUrl: subtes_imgs[estacion.linea],
-                                    iconSize: [32, 32],
-                                    iconAnchor: [16, 32],
-                                    popupAnchor: [0, -32],
-                                })}
-                            >
-                                <Popup>
-                                    {estacion.estacion} - {estacion.distancia} m
-                                    <DirectionsSubwayIcon sx={{ marginLeft: 1 }} />
-                                </Popup>
-                            </Marker>
+                            <React.Fragment key={index}>
+                                <Marker
+                                    key={index}
+                                    position={[estacion.lat, estacion.long]}
+                                    icon={new L.Icon({
+                                        iconUrl: subtes_imgs[estacion.linea],
+                                        iconSize: [32, 32],
+                                        iconAnchor: [16, 32],
+                                        popupAnchor: [0, -32],
+                                    })}
+                                >
+                                    <Popup>
+                                        {estacion.estacion} - {estacion.distancia} m
+                                        <DirectionsSubwayIcon sx={{ marginLeft: 1 }} />
+                                    </Popup>
+                                </Marker>
+                            </React.Fragment>
+
                         ))}
                     </MapContainer>)}
             </Box>

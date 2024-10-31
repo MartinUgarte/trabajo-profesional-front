@@ -2,7 +2,8 @@
 
 import {
     property_types,
-    currencies
+    currencies,
+    Preferences
 } from "../../../types";
 import {
     Box,
@@ -61,7 +62,7 @@ export default function Filter() {
             propertyType: "",
             minPrice: 0,
             maxPrice: 0,
-            currency: "ARS",
+            currency: "",
             minRooms: 0,
             maxRooms: 0,
             minM2: 0,
@@ -85,16 +86,20 @@ export default function Filter() {
     const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
     const handleFilterSubmit = async (formData: FormValues) => {
-        localStorage.setItem("propertyType", formData.propertyType.toString());
-        localStorage.setItem("minPrice", formData.minPrice.toString());
-        localStorage.setItem("maxPrice", formData.maxPrice.toString());
-        localStorage.setItem("currency", formData.currency.toString());
-        localStorage.setItem("minRooms", formData.minRooms.toString());
-        localStorage.setItem("maxRooms", formData.maxRooms.toString());
-        localStorage.setItem("hasGarage", formData.hasGarage.toString());
-        localStorage.setItem("rental", formData.rental.toString());
-        localStorage.setItem("minM2", formData.minM2.toString());
-        localStorage.setItem("maxM2", formData.maxM2.toString());
+        const preferences: Preferences = {};
+
+        if (formData.propertyType) preferences.tipo_propiedad = formData.propertyType.toString().toLowerCase();
+        if (formData.minPrice) preferences.precio_min = formData.minPrice;
+        if (formData.maxPrice) preferences.precio_max = formData.maxPrice;
+        if (formData.currency) preferences.tipo_moneda = formData.currency;
+        if (formData.minRooms) preferences.ambientes_min = formData.minRooms;
+        if (formData.maxRooms) preferences.ambientes_max = formData.maxRooms;
+        if (formData.hasGarage) preferences.cochera = formData.hasGarage;
+        if (formData.rental) preferences.alquiler = formData.rental;
+        if (formData.minM2) preferences.m2_min = formData.minM2;
+        if (formData.maxM2) preferences.m2_max = formData.maxM2;
+
+        localStorage.setItem("preferences", JSON.stringify(preferences));
 
         setLoading(true);
 
@@ -127,8 +132,8 @@ export default function Filter() {
 
             <Box width='100%' flexDirection='column' justifyContent='center' alignItems='center' height='100%' display='flex' flex='1' component="form" onSubmit={handleSubmit(handleFilterSubmit)}>
 
-                <Box display='flex' flex='0.7' width='50%' height='100%' justifyContent='center' flexDirection='column' p={3} boxShadow={3} borderRadius={2} bgcolor="white" sx={{ mt: '5%' }}>
-                    <Box flexDirection='column' display='flex' flex='0.2'>
+                <Box display='flex' flex='0.7' width='50%' height='100%' justifyContent='center' flexDirection='column' p={3} boxShadow={3} borderRadius={5} bgcolor="white" sx={{ mt: '5%' }}>
+                    <Box flexDirection='column' display='flex' flex='0.2' sx={{ justifyContent: 'flex-end', mt: '10%' }}>
                         <Typography sx={{ alignSelf: 'center', fontFamily: 'Rubik', fontSize: '2.5rem', color: 'black', fontWeight: 'bold' }} variant="h4" gutterBottom>
                             Bienvenido
                         </Typography>
@@ -136,7 +141,7 @@ export default function Filter() {
                             ¿Cómo sería tu propiedad ideal?
                         </Typography>
                     </Box>
-                    <Box display='flex' flex='0.8' flexDirection='column'>
+                    <Box display='flex' flex='0.8' flexDirection='column' sx={{ justifyContent: 'center', width: '90%', alignSelf: 'center' }}>
                         <TextField
                             fullWidth
                             id="property-type-select"
@@ -242,7 +247,7 @@ export default function Filter() {
                                 helperText={errors.maxM2?.message}
                             />
                         </Box>
-                        <Box display='flex' width='100%' flexDirection='row' justifyContent='flex-start'>
+                        <Box display='flex' width='100%' flexDirection='row' justifyContent='flex-start' sx={{ mt: '2%' }}>
                             <FormControlLabel
                                 control={
                                     <Checkbox
@@ -268,6 +273,7 @@ export default function Filter() {
                                                 color: '#007bb5',
                                             },
                                         }}
+                                        defaultChecked
                                     />
                                 }
                                 sx={{ color: '#333', fontFamily: 'Rubik' }}

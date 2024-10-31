@@ -36,7 +36,7 @@ export default function LoadingModal({ open }: LoadingModalProps) {
                             borderRadius: '50%', // Si quieres que sea circular
                         }}
                     />
-                    
+
                     {/* CircularProgress que rodea la imagen */}
                     <CircularProgress
                         size={120} // Asegúrate de que el size sea un poco más grande que la imagen para que la rodee

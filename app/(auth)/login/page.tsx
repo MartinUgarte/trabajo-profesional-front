@@ -145,8 +145,8 @@ export default function LoginPage() {
                     <Box
                         component="img"
                         sx={{
-                            height: '70%',
-                            width: '70%',
+                            height: '70%', // Manteniendo el tamaño relativo
+                            width: '70%',  // Manteniendo el tamaño relativo
                             marginBottom: '1%',
                             marginTop: '1%'
                         }}
@@ -166,7 +166,7 @@ export default function LoginPage() {
                         display="flex"
                         flexDirection="column"
                         justifyContent="center"
-                        width='70%'
+                        width='70%' // Cambiando a porcentaje
                         onSubmit={handleSubmit(handleFormSubmit)}
                     >
                         <TextField
@@ -226,10 +226,11 @@ export default function LoginPage() {
                                 sx={{
                                     background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)', // Gradiente azul
                                     borderRadius: '20px',  // Bordes redondeados
-                                    padding: '5px 15px',  // Tamaño del botón más pequeño
+                                    width: '45%',
+                                    padding: '2%',
                                     color: 'white',  // Texto blanco para contraste
                                     fontWeight: 'bold',  // Texto en negrita
-                                    fontSize: '1rem', // Tamaño de fuente más pequeño (puedes ajustar según prefieras)
+                                    fontSize: '1rem', // Tamaño de fuente
                                     boxShadow: '0 2px 4px 2px rgba(33, 203, 243, .3)',  // Sombra suave
                                     transition: 'transform 0.2s, box-shadow 0.2s',  // Transiciones suaves para el hover
                                     '&:hover': {
@@ -247,10 +248,11 @@ export default function LoginPage() {
                                 sx={{
                                     background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)', // Gradiente azul
                                     borderRadius: '20px',  // Bordes redondeados
-                                    padding: '5px 15px',  // Tamaño del botón más pequeño
+                                    width: '45%',
+                                    padding: '2%',
                                     color: 'white',  // Texto blanco para contraste
                                     fontWeight: 'bold',  // Texto en negrita
-                                    fontSize: '1rem', // Tamaño de fuente más pequeño (puedes ajustar según prefieras)
+                                    fontSize: '1rem', // Tamaño de fuente
                                     boxShadow: '0 2px 4px 2px rgba(33, 203, 243, .3)',  // Sombra suave
                                     transition: 'transform 0.2s, box-shadow 0.2s',  // Transiciones suaves para el hover
                                     '&:hover': {

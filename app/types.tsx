@@ -33,6 +33,15 @@ export const subtes_imgs = {
     "H": "https://emova.com.ar/wp-content/uploads/2021/11/past-h-60.png",
 }
 
+export type LugarFrecuentado = {
+    direccion: string;
+    longitud: number;
+    id: number;
+    user_id: number;
+    latitud: number;
+    estaciones_cercanas: EstacionCercana[];
+}
+
 export type EstacionCercana = {
     estacion: string;
     linea: string;
@@ -59,3 +68,19 @@ export type Recommendation = {
     estacion_cercana: EstacionCercana[];
     drive_id: string;
 };
+
+export type Preferences = {
+    tipo_propiedad?: string,
+    precio_min?: number,
+    precio_max?: number,
+    tipo_moneda?: string,
+    ambientes_min?: number,
+    ambientes_max?: number,
+    cochera?: boolean,
+    alquiler?: boolean,
+    m2_min?: number,
+    m2_max?: number
+    lugares_frecuentados?: string[]
+
+    
+}

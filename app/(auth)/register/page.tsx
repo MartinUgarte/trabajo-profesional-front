@@ -13,6 +13,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ErrorModal from "../ErrorModal";
+import LoadingModal from "../LoadingModal";
 
 type FormValues = {
     username: string;
@@ -37,7 +38,9 @@ export default function RegisterPage() {
 
     const { register, handleSubmit } = form;
 
-    const handleFormSubmit = (formData: FormValues) => {
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    const handleFormSubmit = async (formData: FormValues) => {
         // Validaciones del lado del cliente
         if (!formData.username) {
             setErrorText("Debe ingresar un nombre de usuario.");
@@ -61,8 +64,9 @@ export default function RegisterPage() {
         }
 
         setShowLoading(true);
+        await sleep(1000);
         console.log(formData);
-        fetch(`http://localhost:3000/register`, {
+        fetch(`http://localhost:8000/register`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -74,14 +78,17 @@ export default function RegisterPage() {
             }),
         })
             .then((res) => {
+                console.log('AAA: ', res)
                 setShowLoading(false);
-                if (res.status === 201) {
+                if (res.status === 200) {
+                    setShowLoading(false);
                     router.push("../filter");
                 } else {
                     // Si la respuesta no es 201, intenta obtener el mensaje de error
                     return res.json().then((data) => {
                         setErrorText(data.msg || "Error desconocido en el servidor.");
                         setShowErrorModal(true);
+                        setShowLoading(false);
                     });
                 }
             })
@@ -116,6 +123,7 @@ export default function RegisterPage() {
                 text={errorText}
             />
 
+            <LoadingModal open={showLoading} /> 
             <Box
                 display="flex"
                 flex="1"
@@ -233,7 +241,7 @@ export default function RegisterPage() {
                             sx={{
                                 background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)', // Gradiente azul
                                 borderRadius: '20px',  // Bordes redondeados
-                                padding: '5px 15px',  // Tamaño del botón más pequeño
+                                padding: '2%',
                                 color: 'white',  // Texto blanco para contraste
                                 fontWeight: 'bold',  // Texto en negrita
                                 mt: '5%',
