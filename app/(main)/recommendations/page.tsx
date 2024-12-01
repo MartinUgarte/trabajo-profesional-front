@@ -133,11 +133,11 @@ export default function Recommendations() {
             alignItems="center"
             justifyContent="center"
             sx={{
-                bgcolor: '#f5f5f5',
+                bgcolor: '#0a0a0a',
                 padding: '2%',
                 height: '100vh',
                 overflow: 'hidden',
-                backgroundImage: 'linear-gradient(45deg, rgba(33, 150, 243, 0.6) 30%, rgba(33, 203, 243, 0.2) 90%), url(https://i.imgur.com/2bUXNNG.png)',
+                backgroundImage: 'linear-gradient(45deg, rgba(33, 150, 243, 0.4) 30%, rgba(33, 203, 243, 0.1) 90%), url(https://i.imgur.com/2bUXNNG.png)',
                 backgroundRepeat: 'no-repeat',
                 backgroundSize: 'cover',
             }}

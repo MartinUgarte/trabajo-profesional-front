@@ -17,6 +17,8 @@ import { Recommendation, LugarFrecuentado } from '@/app/types';
 import L from 'leaflet';
 import RatingModal from './RatingModal';
 import LoadingModal from '@/app/(auth)/LoadingModal';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import { useRouter } from 'next/navigation';
 
 export const subtes_imgs = {
     "A": "https://emova.com.ar/wp-content/uploads/2021/11/past-a-60.png",
@@ -28,7 +30,8 @@ export const subtes_imgs = {
 };
 
 const iconButtonStyles = {
-    color: 'rgba(33, 150, 243, 0.6)',
+    color: 'white',
+    marginRigth: '5%',
     padding: 0,
     borderRadius: '50%',
     transition: 'transform 0.3s ease-in-out',
@@ -42,6 +45,7 @@ const iconButtonStyles = {
 };
 
 export default function RecommendationDetail() {
+    const router = useRouter();
     const [recommendation, setRecommendation] = useState<Recommendation>({});
     const [images, setImages] = useState<string[]>(['https://i.imgur.com/XyVJU8I.png']);
     const [lugaresFrecuentados, setLugaresFrecuentados] = useState<LugarFrecuentado[]>([{
@@ -154,7 +158,7 @@ export default function RecommendationDetail() {
 
     return (
         <Box sx={{
-            flexGrow: 1, padding: 3, display: 'flex', flexDirection: 'column', gap: 2, backgroundImage: 'linear-gradient(45deg, rgba(33, 150, 243, 0.6) 30%, rgba(33, 203, 243, 0.2) 90%), url(https://i.imgur.com/2bUXNNG.png)',
+            flexGrow: 1, padding: 3, display: 'flex', flexDirection: 'column', gap: 2, backgroundImage: 'linear-gradient(45deg, rgba(33, 150, 243, 0.4) 30%, rgba(33, 203, 243, 0.1) 90%), url(https://i.imgur.com/2bUXNNG.png)',
             backgroundRepeat: 'no-repeat',
             backgroundSize: 'cover',
         }}>
@@ -335,6 +339,12 @@ export default function RecommendationDetail() {
             </Box>
 
             <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 2 }}>
+                <IconButton
+                    onClick={() => { router.back() }}
+                    sx={{ ...iconButtonStyles }}
+                >
+                    <ArrowBackIosIcon />
+                </IconButton>
                 <Button
                     variant="contained"
                     sx={{
