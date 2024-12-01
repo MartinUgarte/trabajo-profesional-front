@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ErrorModal from "../ErrorModal";
 import LoadingModal from "../LoadingModal";
+import { Preferences } from "@/app/types";
 
 type FormValues = {
     email: string;
@@ -40,6 +41,98 @@ export default function LoginPage() {
     // Función para el delay de 1 segundo
     const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+    const fetchRecommendations = async (jwtToken: string, preferences) => {
+        console.log('About to fetch recos from login')
+
+        fetch(`http://localhost:8000/hybrid/recommend`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${jwtToken}`
+            },
+
+            body: JSON.stringify({
+                collab: {
+                    user_id: 1
+                },
+                kbrs: preferences
+            }),
+        })
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then((data) => {
+                /*localStorage.setItem("recommendations", JSON.stringify(data.recommendations));
+                localStorage.setItem("totalCount", data.total_count);
+                */
+                localStorage.setItem("recommendations", JSON.stringify(data));
+                localStorage.setItem("totalCount", "12");
+                localStorage.setItem("frequentedPlaces", JSON.stringify(preferences.lugares_frecuentados));
+                router.push('../recommendations');
+            })
+            .catch((error) => {
+                console.error("Error fetching recommendations:", error);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    };
+
+    const saveLocalPreferences  = (token: string, data) => {
+        const preferences: Preferences = {};
+
+        if (data.tipo_propiedad) preferences.tipo_propiedad = data.tipo_propiedad.toString().toLowerCase();
+        if (data.precio_min) preferences.precio_min = data.precio_min;
+        if (data.precio_max) preferences.precio_max = data.precio_max;
+        if (data.tipo_moneda) preferences.tipo_moneda = data.tipo_moneda;
+        if (data.ambientes_min) preferences.ambientes_min = data.ambientes_min;
+        if (data.ambientes_max) preferences.ambientes_max = data.ambientes_max;
+        if (data.cochera) preferences.cochera = data.cochera;
+        if (data.alquiler) preferences.alquiler = data.alquiler;
+        if (data.m2_min) preferences.m2_min = data.m2_min;
+        if (data.m2_max) preferences.m2_max = data.m2_max;
+        if (data.lugares_frecuentados) preferences.lugares_frecuentados = data.lugares_frecuentados;
+
+        localStorage.setItem("preferences", JSON.stringify(preferences));
+
+        fetchRecommendations(token, preferences);
+    }
+
+    const checkPreferences = async(token: string) => {
+
+        fetch(`http://localhost:8000/user-preference`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+        })
+        .then((res) => {
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            return res.json();
+        })
+        .then((data) => {
+            if(data == null) {
+                setLoading(false);
+                router.push('/filter');
+                
+            } else{
+                saveLocalPreferences(token, data);
+                
+            }
+        })
+        .catch((error) => {
+            setErrorText(`Error al obtener las preferences: ${error}`);
+            setShowErrorModal(true);
+            setLoading(false);
+        })
+    }
+
     const handleFormSubmit = async (formData: FormValues) => {
         if (!formData.email) {
             setErrorText("Debe ingresar un email.");
@@ -57,10 +150,8 @@ export default function LoginPage() {
             return;
         }
 
-        // Mostrar el modal de carga
         setLoading(true);
 
-        // Espera 1 segundo antes de continuar
         await sleep(1000);
 
         fetch(`http://localhost:8000/login`, {
@@ -77,10 +168,12 @@ export default function LoginPage() {
                 if (res.status == 401) {
                     setErrorText("Usuario o contraseña incorrectos.");
                     setShowErrorModal(true);
+                    setLoading(false);
                 } else if (res.status != 200) {
                     return res.json().then((data) => {
                         setErrorText(data.message || "Error desconocido en el servidor.");
                         setShowErrorModal(true);
+                        setLoading(false);
                     });
                 }
                 return res.json();
@@ -88,17 +181,14 @@ export default function LoginPage() {
             .then((data) => {
                 if (data.access_token) {
                     localStorage.setItem("jwtToken", data.access_token);
-                    router.push('../filter');
+                    checkPreferences(data.access_token);
                 }
             })
             .catch((error) => {
                 setErrorText("El email o la contraseña son incorrectos.");
                 setShowErrorModal(true);
+                setLoading(false)
             })
-            .finally(() => {
-                // Ocultar el modal de carga cuando finalice el fetch
-                setLoading(false);
-            });
     };
 
     const handleClickShowPassword = () => setShowPassword(!showPassword);

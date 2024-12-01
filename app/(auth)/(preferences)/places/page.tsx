@@ -89,6 +89,7 @@ export default function Filter() {
         if (frequentedPlaces.length > 0) {
             localStorage.setItem("preferences", JSON.stringify(preferences));
         }
+        console.log('about to fetch recommendations');
 
         fetch(`http://localhost:8000/hybrid/recommend`, {
             method: "POST",
@@ -104,10 +105,18 @@ export default function Filter() {
                 kbrs: preferences
             }),
         })
-            .then((res) => res.json())
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
             .then((data) => {
-                localStorage.setItem("recommendations", JSON.stringify(data.recommendations));
+                /*localStorage.setItem("recommendations", JSON.stringify(data.recommendations));
                 localStorage.setItem("totalCount", data.total_count);
+                */
+                localStorage.setItem("recommendations", JSON.stringify(data));
+                localStorage.setItem("totalCount", "12");
                 localStorage.setItem("frequentedPlaces", JSON.stringify(frequentedPlaces));
                 router.push('../recommendations');
             })
@@ -115,7 +124,6 @@ export default function Filter() {
                 console.error("Error fetching recommendations:", error);
             })
             .finally(() => {
-                // Ocultar modal de carga
                 setLoading(false);
             });
     };
