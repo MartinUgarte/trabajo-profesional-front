@@ -35,7 +35,7 @@ export default function PropertyCard({ recommendation, images }: PropertyCardPro
             {/* Imagen de la propiedad */}
             <CardMedia
                 component="img"
-                sx={{ width: '20%' }}
+                sx={{ width: 250, height: 250, objectFit: 'cover' }}
                 image={recommendation.drive_id == null
                     ? 'https://i.imgur.com/XyVJU8I.png'
                     : `https://drive.google.com/thumbnail?id=${imageLinks[0]}`}

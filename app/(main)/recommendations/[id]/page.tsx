@@ -59,21 +59,6 @@ export default function RecommendationDetail() {
     const [modalOpen, setModalOpen] = useState(false);
     const [loading, setLoading] = useState(false); // Estado de carga
 
-    const geocodeAddress = async (direccion: string): Promise<{ lat: number; long: number } | null> => {
-        try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(direccion)}&format=json`);
-            const data = await response.json();
-
-            if (data && data.length > 0) {
-                const { lat, lon } = data[0];
-                return { lat: parseFloat(lat), long: parseFloat(lon) };
-            }
-        } catch (error) {
-            console.error("Error geocoding address:", error);
-        }
-        return null;
-    };
-
     const propertyIcon = new L.Icon({
         iconUrl: 'https://i.imgur.com/QIh0JOI.png',
         iconSize: [32, 32],
@@ -147,7 +132,6 @@ export default function RecommendationDetail() {
 
     const shownLines: Set<string> = new Set();
 
-    // Función para abrir el modal
     const handleOpenModal = () => {
         setModalOpen(true);
     };
@@ -166,9 +150,8 @@ export default function RecommendationDetail() {
                 <Paper elevation={3} sx={{ width: '60%' }}>
                     <Carousel showThumbs={false} showStatus={false} dynamicHeight>
                         {recommendation.drive_id == null ? (
-                            // Envolviendo el elemento en un array
                             [
-                                <div key="null-image"> {/* Agregando un key para evitar warnings */}
+                                <div key="null-image">
                                     <img
                                         src={'https://i.imgur.com/XyVJU8I.png'}
                                         alt={`Imagen null`}

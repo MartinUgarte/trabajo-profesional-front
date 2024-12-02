@@ -112,11 +112,8 @@ export default function Filter() {
                 return res.json();
             })
             .then((data) => {
-                /*localStorage.setItem("recommendations", JSON.stringify(data.recommendations));
+                localStorage.setItem("recommendations", JSON.stringify(data.recommendations));
                 localStorage.setItem("totalCount", data.total_count);
-                */
-                localStorage.setItem("recommendations", JSON.stringify(data));
-                localStorage.setItem("totalCount", "12");
                 localStorage.setItem("frequentedPlaces", JSON.stringify(frequentedPlaces));
                 router.push('../recommendations');
             })

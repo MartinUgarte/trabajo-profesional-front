@@ -65,11 +65,8 @@ export default function LoginPage() {
                 return res.json();
             })
             .then((data) => {
-                /*localStorage.setItem("recommendations", JSON.stringify(data.recommendations));
+                localStorage.setItem("recommendations", JSON.stringify(data.recommendations));
                 localStorage.setItem("totalCount", data.total_count);
-                */
-                localStorage.setItem("recommendations", JSON.stringify(data));
-                localStorage.setItem("totalCount", "12");
                 localStorage.setItem("frequentedPlaces", JSON.stringify(preferences.lugares_frecuentados));
                 router.push('../recommendations');
             })
