@@ -45,17 +45,14 @@ export default function Recommendations() {
     };
 
     const apiKey = 'AIzaSyAfPFEbgK7iwpufDlShVKoGKrwQqkXElww';
-
+    
     const fetchPropertyImages = async (property_folder_id: string) => {
         try {
             const response = await fetch(`https://www.googleapis.com/drive/v3/files?q='${property_folder_id}'+in+parents&key=${apiKey}&fields=files(id,name,mimeType)`);
             const data = await response.json();
             const imageLinks = data.files
-                .filter(file => file.mimeType.startsWith('image/'))
-                .map(file => `${file.id}`); // Enlace directo a la imagen
-            if (property_folder_id == '161W2uA7kqcGkpzxcrHihvrWmSoPZQxBK') {
-                console.log('SOY VERA AL 100', imageLinks);
-            }
+                .filter((file: { mimeType: string; }) => file.mimeType.startsWith('image/'))
+                .map((file: { id: any; }) => `${file.id}`); 
             return imageLinks;
         } catch (error) {
             console.error('Error al cargar imágenes:', error);
@@ -64,12 +61,15 @@ export default function Recommendations() {
 
     useEffect(() => {
         getRecommendations();
-    }, []); // Este solo corre al montar el componente
+    }, []); 
+
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
     useEffect(() => {
         const fetchImagesForRecommendations = async () => {
             for (const recommendation of recommendations) {
                 if (recommendation.drive_id != undefined) {
+                    //await sleep(1000);
                     const propertyImages = await fetchPropertyImages(recommendation.drive_id);
                     setImages(prevImages => ({
                         ...prevImages,
@@ -142,9 +142,9 @@ export default function Recommendations() {
                 backgroundSize: 'cover',
             }}
         >
-            <Box width='90%' height='10%' display='flex' flexDiction='row' justifyContent='center' alignItems='center'>
+            <Box width='90%' height='10%' display='flex' flexDirection='row' justifyContent='center' alignItems='center'>
                 <Box
-                    width='10%' height='100%' display='flex' flex='0.9' flexDiction='row' justifyContent='center' alignItems='center'
+                    width='10%' height='100%' display='flex' flex='0.9' flexDirection='row' justifyContent='center' alignItems='center'
                     sx={{
                         mb: '1%',
                         cursor: 'pointer',

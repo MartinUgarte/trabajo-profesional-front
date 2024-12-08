@@ -36,10 +36,15 @@ export default function PropertyCard({ recommendation, images }: PropertyCardPro
             <CardMedia
                 component="img"
                 sx={{ width: 250, height: 250, objectFit: 'cover' }}
-                image={recommendation.drive_id == null
-                    ? 'https://i.imgur.com/XyVJU8I.png'
-                    : `https://drive.google.com/thumbnail?id=${imageLinks[0]}`}
+                image={
+                    recommendation.drive_id == null || !imageLinks[0]
+                        ? 'https://i.imgur.com/XyVJU8I.png'
+                        : `https://drive.google.com/thumbnail?id=${imageLinks[0]}`
+                }
                 alt="Imagen de propiedad"
+                onError={(e) => {
+                    e.currentTarget.src = 'https://i.imgur.com/XyVJU8I.png'; // Imagen de respaldo
+                }}
             />
 
             {/* Contenido de la Card con flex para dividir */}
@@ -62,8 +67,8 @@ export default function PropertyCard({ recommendation, images }: PropertyCardPro
                         <Typography variant="body2" color="text.secondary" component="div">
                             {recommendation.m2} m² - {recommendation.ambientes} ambientes
                         </Typography>
-                        <Typography sx={{mt: '2%', color: '#00abe4'}} variant="body1" color="text.secondary" component="div">
-                            {Math.round(recommendation._final_rating / 5 * 100)}% match 
+                        <Typography sx={{ mt: '2%', color: '#00abe4' }} variant="body1" color="text.secondary" component="div">
+                            {Math.round(recommendation._final_rating / 5 * 100)}% match
                         </Typography>
                         <Button
                             variant="contained"

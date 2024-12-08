@@ -98,12 +98,9 @@ export default function Filter() {
                 "Authorization": `Bearer ${jwtToken}`
             },
 
-            body: JSON.stringify({
-                collab: {
-                    user_id: 3
-                },
-                kbrs: preferences
-            }),
+            body: JSON.stringify(
+                preferences
+            ),
         })
             .then((res) => {
                 if (!res.ok) {

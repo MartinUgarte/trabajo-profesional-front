@@ -51,12 +51,9 @@ export default function LoginPage() {
                 "Authorization": `Bearer ${jwtToken}`
             },
 
-            body: JSON.stringify({
-                collab: {
-                    user_id: 1
-                },
-                kbrs: preferences
-            }),
+            body: JSON.stringify(
+                preferences
+            ),
         })
             .then((res) => {
                 if (!res.ok) {

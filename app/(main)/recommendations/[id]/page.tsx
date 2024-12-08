@@ -46,7 +46,25 @@ const iconButtonStyles = {
 
 export default function RecommendationDetail() {
     const router = useRouter();
-    const [recommendation, setRecommendation] = useState<Recommendation>({});
+    const [recommendation, setRecommendation] = useState<Recommendation>({
+        id: '',
+        tipo_propiedad: '',
+        m2: 0,
+        ambientes: 0,
+        cochera: false,
+        precio: '',
+        tipo_moneda: '',
+        alquiler: false,
+        link: '',
+        direccion: '',
+        lat: 0,
+        long: 0,
+        expensas: '',
+        tipo_moneda_expensas: '',
+        estacion_cercana: [],
+        drive_id: '',
+    });
+
     const [images, setImages] = useState<string[]>(['https://i.imgur.com/XyVJU8I.png']);
     const [lugaresFrecuentados, setLugaresFrecuentados] = useState<LugarFrecuentado[]>([{
         direccion: '',
@@ -54,8 +72,9 @@ export default function RecommendationDetail() {
         id: 0,
         user_id: 0,
         latitud: 0,
-        estacion_cercana: 0
+        estaciones_cercanas: []
     }]);
+
     const [modalOpen, setModalOpen] = useState(false);
     const [loading, setLoading] = useState(false); // Estado de carga
 
@@ -112,9 +131,6 @@ export default function RecommendationDetail() {
         if (recoImages) {
             setImages(JSON.parse(recoImages));
         }
-
-        console.log('RECOMMENDATION: ', JSON.parse(reco));
-        console.log('IMAGES: ', JSON.parse(recoImages));
     };
 
     const formatPrice = (price: string) => {
@@ -168,7 +184,7 @@ export default function RecommendationDetail() {
                             images.map((src, index) => (
                                 <div key={index}>
                                     <img
-                                        src={`https://drive.google.com/thumbnail?id=${src}&sz=w1000`}
+                                        src={`https://drive.google.com/thumbnail?id=${src}&sz=w10000`}
                                         alt={`Imagen ${index + 1}`}
                                         style={{
                                             width: '100%',
@@ -206,9 +222,9 @@ export default function RecommendationDetail() {
                             <Box display='flex' flex='0.3' justifyContent='flex-end'>
                                 <IconButton
                                     sx={{ ...iconButtonStyles }}
-                                    onClick={handleOpenModal} // Abrir modal al hacer clic
+                                    onClick={handleOpenModal}
                                 >
-                                    <StarIcon />
+                                    <StarIcon sx={{ color: '#FFB700' }} />
                                 </IconButton>
                             </Box>
                         </Box>
@@ -244,9 +260,9 @@ export default function RecommendationDetail() {
                                     {Array.from(new Set(recommendation.estacion_cercana.map(estacion => estacion.linea))).map((linea, index) => (
                                         <img
                                             key={index}
-                                            src={subtes_imgs[linea]} // Imagen correspondiente a la línea
+                                            src={subtes_imgs[linea]}
                                             alt={`Línea ${linea}`}
-                                            style={{ height: '24px', width: '24px', marginBottom: '5px' }} // Tamaño más pequeño
+                                            style={{ height: '24px', width: '24px', marginBottom: '5px' }}
                                         />
                                     ))}
                                 </Box>
@@ -260,7 +276,7 @@ export default function RecommendationDetail() {
             </Box>
 
             <Box sx={{ width: '100%', height: '400px' }}>
-                {recommendation.lat !== undefined && recommendation.long !== undefined && (
+                {recommendation.lat !== 0 && recommendation.long !== 0 && (
                     <MapContainer center={[recommendation.lat, recommendation.long]} zoom={14} style={{ height: '100%', width: '100%' }}>
                         <TileLayer
                             url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
@@ -270,7 +286,6 @@ export default function RecommendationDetail() {
                             <Popup>{recommendation.direccion}</Popup>
                         </Marker>
 
-                        {/* Renderiza los lugares frecuentados y sus estaciones cercanas */}
                         {lugaresFrecuentados.map((lugar, index) => (
                             lugar.latitud !== 0 && lugar.longitud !== 0 && (
                                 <React.Fragment key={`lugar-${index}`}>
@@ -331,18 +346,18 @@ export default function RecommendationDetail() {
                 <Button
                     variant="contained"
                     sx={{
-                        background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)', // Gradiente azul
-                        borderRadius: '20px',  // Bordes redondeados
-                        padding: '5px 15px',  // Tamaño del botón más pequeño
-                        color: 'white',  // Texto blanco para contraste
-                        fontWeight: 'bold',  // Texto en negrita
-                        fontSize: '1rem', // Tamaño de fuente más pequeño (puedes ajustar según prefieras)
-                        boxShadow: '0 2px 4px 2px rgba(33, 203, 243, .3)',  // Sombra suave
-                        transition: 'transform 0.2s, box-shadow 0.2s',  // Transiciones suaves para el hover
+                        background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                        borderRadius: '20px',
+                        padding: '5px 15px',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        fontSize: '1rem',
+                        boxShadow: '0 2px 4px 2px rgba(33, 203, 243, .3)',
+                        transition: 'transform 0.2s, box-shadow 0.2s',
                         '&:hover': {
-                            backgroundColor: '#1976D2',  // Color de fondo más oscuro al pasar el cursor
-                            boxShadow: '0 4px 8px 2px rgba(33, 203, 243, .5)',  // Sombra más intensa en hover
-                            transform: 'scale(1.05)',  // Efecto de agrandamiento
+                            backgroundColor: '#1976D2',
+                            boxShadow: '0 4px 8px 2px rgba(33, 203, 243, .5)',
+                            transform: 'scale(1.05)',
                         },
                     }}
                     href={recommendation.link}
@@ -354,12 +369,11 @@ export default function RecommendationDetail() {
 
             </Box>
 
-            {/* Aquí se agrega el modal */}
             <RatingModal
                 open={modalOpen}
                 onClose={handleCloseModal}
-                loading={loading} // Pasar el estado de carga al modal
-                setLoading={setLoading} // Pasar la función setLoading al modal
+                loading={loading}
+                setLoading={setLoading}
                 propertyId={recommendation.id}
             />
 
