@@ -5,14 +5,10 @@ import {
     TextField,
     Typography,
     IconButton,
-    Modal,
-    CircularProgress,
 } from "@mui/material";
-import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import LoadingModal from "../../LoadingModal";
@@ -21,7 +17,6 @@ type FormValues = {
     frequentedPlaces: string[];
 };
 
-// Función sleep para retrasar la ejecución por un tiempo especificado
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const iconButtonStyles = {
@@ -29,10 +24,10 @@ const iconButtonStyles = {
     color: 'white',
     padding: 0,
     borderRadius: '50%',
-    transition: 'transform 0.3s ease-in-out', // Agregar transición
+    transition: 'transform 0.3s ease-in-out',
     '&:hover': {
         bgcolor: '#007bb5',
-        transform: 'scale(1.2)', // Escalar al 120% en hover
+        transform: 'scale(1.2)', 
     },
     '& .MuiSvgIcon-root': {
         fontSize: 50,
@@ -43,22 +38,22 @@ const iconButtonStyles = {
 const addButtonStyles = {
     color: '#005b96',
     marginTop: 2,
-    transition: 'transform 0.3s ease-in-out', // Agregar transición
+    transition: 'transform 0.3s ease-in-out',
     '&:hover': {
-        transform: 'scale(1.1)', // Escalar al 120% en hover
+        transform: 'scale(1.1)', 
     },
 };
 
 const deleteButtonStyles = {
-    transition: 'transform 0.3s ease-in-out', // Transición para el efecto de agrandarse
+    transition: 'transform 0.3s ease-in-out', 
     '&:hover': {
-        transform: 'scale(1.1)', // Escalar al 120% en hover
+        transform: 'scale(1.1)', 
     },
 };
 
 export default function Filter() {
     const [frequentedPlaces, setFrequentedPlaces] = useState<string[]>([""]);
-    const [loading, setLoading] = useState(false); // Estado para el modal de carga
+    const [loading, setLoading] = useState(false); 
     const router = useRouter();
 
     useEffect(() => {

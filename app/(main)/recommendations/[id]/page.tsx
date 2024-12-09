@@ -121,7 +121,7 @@ export default function RecommendationDetail() {
     const getRecommendation = () => {
         let reco = localStorage.getItem('property');
         let recoImages = localStorage.getItem('propertyImages');
-
+        console.log('RECO: ', recoImages)
         if (!reco) {
             return;
         }
@@ -165,23 +165,8 @@ export default function RecommendationDetail() {
             <Box sx={{ display: 'flex', gap: 2 }}>
                 <Paper elevation={3} sx={{ width: '60%' }}>
                     <Carousel showThumbs={false} showStatus={false} dynamicHeight>
-                        {recommendation.drive_id == null ? (
-                            [
-                                <div key="null-image">
-                                    <img
-                                        src={'https://i.imgur.com/XyVJU8I.png'}
-                                        alt={`Imagen null`}
-                                        style={{
-                                            width: '100%',
-                                            height: 'auto',
-                                            maxHeight: '400px',
-                                            objectFit: 'cover',
-                                        }}
-                                    />
-                                </div>
-                            ]
-                        ) : (
-                            images.map((src, index) => (
+                        {images.length > 0
+                            ? images.map((src, index) => (
                                 <div key={index}>
                                     <img
                                         src={`https://drive.google.com/thumbnail?id=${src}&sz=w10000`}
@@ -192,10 +177,26 @@ export default function RecommendationDetail() {
                                             maxHeight: '400px',
                                             objectFit: 'cover',
                                         }}
+                                        onError={(e) => {
+                                            console.error(`Error loading image at index ${index} with ID: ${src}`, e);
+                                        }}
                                     />
                                 </div>
                             ))
-                        )}
+                            : [
+                                <div key="default-image">
+                                    <img
+                                        src="https://i.imgur.com/XyVJU8I.png"
+                                        alt="Imagen por defecto"
+                                        style={{
+                                            width: '100%',
+                                            height: 'auto',
+                                            maxHeight: '400px',
+                                            objectFit: 'cover',
+                                        }}
+                                    />
+                                </div>,
+                            ]}
                     </Carousel>
 
                 </Paper>

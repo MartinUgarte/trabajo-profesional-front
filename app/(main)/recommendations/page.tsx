@@ -12,6 +12,7 @@ import SellIcon from '@mui/icons-material/Sell';
 import DriveEtaIcon from '@mui/icons-material/DriveEta';
 import PlaceIcon from '@mui/icons-material/Place';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 
 export default function Recommendations() {
     const router = useRouter();
@@ -22,7 +23,9 @@ export default function Recommendations() {
     const [loading, setLoading] = useState<boolean>(false);
 
     const getRecommendations = () => {
+
         let recos = localStorage.getItem('recommendations');
+
         console.log('recos', recos)
         if (!recos) {
             return;
@@ -42,17 +45,18 @@ export default function Recommendations() {
         setPreferences(JSON.parse(preferences));
 
         console.log('preferences', preferences);
-    };
+    }
 
     const apiKey = 'AIzaSyAfPFEbgK7iwpufDlShVKoGKrwQqkXElww';
-    
+
     const fetchPropertyImages = async (property_folder_id: string) => {
         try {
             const response = await fetch(`https://www.googleapis.com/drive/v3/files?q='${property_folder_id}'+in+parents&key=${apiKey}&fields=files(id,name,mimeType)`);
             const data = await response.json();
+            console.log('data: ', data)
             const imageLinks = data.files
                 .filter((file: { mimeType: string; }) => file.mimeType.startsWith('image/'))
-                .map((file: { id: any; }) => `${file.id}`); 
+                .map((file: { id: any; }) => `${file.id}`);
             return imageLinks;
         } catch (error) {
             console.error('Error al cargar imágenes:', error);
@@ -61,15 +65,12 @@ export default function Recommendations() {
 
     useEffect(() => {
         getRecommendations();
-    }, []); 
-
-    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    }, []);
 
     useEffect(() => {
         const fetchImagesForRecommendations = async () => {
             for (const recommendation of recommendations) {
                 if (recommendation.drive_id != undefined) {
-                    //await sleep(1000);
                     const propertyImages = await fetchPropertyImages(recommendation.drive_id);
                     setImages(prevImages => ({
                         ...prevImages,
@@ -121,7 +122,6 @@ export default function Recommendations() {
                 console.error("Error fetching recommendations:", error);
             })
             .finally(() => {
-                // Ocultar modal de carga
                 setLoading(false);
             });
     };
@@ -179,7 +179,7 @@ export default function Recommendations() {
                                             : '-'}
                             </Typography>
                         </Box>
-                        <Box sx={{ textAlign: 'center'}}>
+                        <Box sx={{ textAlign: 'center' }}>
                             <SquareFootIcon fontSize="large" />
                             <Typography>
                                 {preferences.m2_min && preferences.m2_max
@@ -192,16 +192,28 @@ export default function Recommendations() {
                             </Typography>
                         </Box>
                         <Box sx={{ textAlign: 'center' }}>
+                            <AttachMoneyIcon fontSize="large" />
+                            <Typography>
+                                {preferences.precio_min && preferences.precio_max
+                                    ? `$${new Intl.NumberFormat('es-ES').format(preferences.precio_min)} - $${new Intl.NumberFormat('es-ES').format(preferences.precio_max)}`
+                                    : preferences.precio_min
+                                        ? `> $${new Intl.NumberFormat('es-ES').format(preferences.precio_min)}`
+                                        : preferences.precio_max
+                                            ? `< $${new Intl.NumberFormat('es-ES').format(preferences.precio_max)}`
+                                            : '-'}
+                            </Typography>
+                        </Box>
+                        <Box sx={{ textAlign: 'center' }}>
                             <DriveEtaIcon fontSize="large" />
                             <Typography>{preferences.cochera ? 'con cochera' : 'sin cochera'}</Typography>
                         </Box>
-                        <Box sx={{ textAlign: 'center'}}>
+                        <Box sx={{ textAlign: 'center' }}>
                             <PlaceIcon fontSize="large" />
                             <Typography>cerca de {preferences.lugares_frecuentados?.join(', ')}</Typography>
                         </Box>
                     </Box>
 
-                    <Box flex='0.3' display='flex' flexDirection='row' alignItmes='center' justifyContent='center'>
+                    <Box flex='0.3' display='flex' flexDirection='row' alignItems='center' justifyContent='center'>
                         <Typography sx={{ mr: '2%', alignSelf: 'center', alignContent: 'center' }}>¡Se han encontrado</Typography>
                         <Typography sx={{ mr: '2%', alignSelf: 'center', alignContent: 'center', color: '#21C1F3' }} variant='h5'>{totalCount}</Typography>
                         <Typography sx={{ alignSelf: 'center', alignContent: 'center' }}>propiedades!</Typography>
@@ -252,34 +264,34 @@ export default function Recommendations() {
                 {loading ? ( // Mostrar CircularProgress mientras se carga
                     <Box display="flex" justifyContent="center" alignItems="center" height="100%">
                         <Box
-                    sx={{
-                        position: 'relative',
-                        display: 'inline-flex', // Esto permite superponer el CircularProgress sobre la imagen
-                    }}
-                >
-                    {/* Imagen que será rodeada */}
-                    <Box
-                        component="img"
-                        src="https://i.imgur.com/wE0iUm5.png" // Aquí va tu imagen
-                        alt="Loading Image"
-                        sx={{
-                            width: 100, // Puedes ajustar el tamaño de la imagen
-                            height: 100,
-                            borderRadius: '50%', // Si quieres que sea circular
-                        }}
-                    />
+                            sx={{
+                                position: 'relative',
+                                display: 'inline-flex', // Esto permite superponer el CircularProgress sobre la imagen
+                            }}
+                        >
+                            {/* Imagen que será rodeada */}
+                            <Box
+                                component="img"
+                                src="https://i.imgur.com/wE0iUm5.png" // Aquí va tu imagen
+                                alt="Loading Image"
+                                sx={{
+                                    width: 100, // Puedes ajustar el tamaño de la imagen
+                                    height: 100,
+                                    borderRadius: '50%', // Si quieres que sea circular
+                                }}
+                            />
 
-                    {/* CircularProgress que rodea la imagen */}
-                    <CircularProgress
-                        size={120} // Asegúrate de que el size sea un poco más grande que la imagen para que la rodee
-                        sx={{
-                            position: 'absolute',
-                            top: '-10px', // Ajusta la posición si es necesario
-                            left: '-10px',
-                            zIndex: 1, // Asegura que el CircularProgress esté sobre la imagen
-                        }}
-                    />
-                </Box>
+                            {/* CircularProgress que rodea la imagen */}
+                            <CircularProgress
+                                size={120} // Asegúrate de que el size sea un poco más grande que la imagen para que la rodee
+                                sx={{
+                                    position: 'absolute',
+                                    top: '-10px', // Ajusta la posición si es necesario
+                                    left: '-10px',
+                                    zIndex: 1, // Asegura que el CircularProgress esté sobre la imagen
+                                }}
+                            />
+                        </Box>
                     </Box>
                 ) : (
                     recommendations.length > 0 &&
