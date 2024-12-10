@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Card, CardContent, Typography, Button, CardMedia, CircularProgress } from "@mui/material";
+import { Box, Typography, CircularProgress } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Preferences, Recommendation } from "@/app/types";
@@ -101,12 +101,12 @@ export default function Recommendations() {
     }, [recommendations]);
 
     const handleResearch = async () => {
-        let jwtToken = localStorage.getItem('jwtToken');
+        const jwtToken = localStorage.getItem('jwtToken');
         if (!jwtToken) {
             return;
         }
 
-        let preferences = localStorage.getItem("preferences")
+        const preferences = localStorage.getItem("preferences")
         if (!preferences) {
             return;
         }

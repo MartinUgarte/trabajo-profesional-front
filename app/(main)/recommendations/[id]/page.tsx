@@ -1,24 +1,25 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import 'leaflet/dist/leaflet.css';
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { Box, Typography, Paper, Button, IconButton } from '@mui/material';
 import { Carousel } from 'react-responsive-carousel';
-import 'react-responsive-carousel/lib/styles/carousel.min.css';
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import SquareFootIcon from '@mui/icons-material/SquareFoot';
-import KingBedIcon from '@mui/icons-material/KingBed';
-import ApartmentIcon from '@mui/icons-material/Apartment';
-import SellIcon from '@mui/icons-material/Sell';
-import DriveEtaIcon from '@mui/icons-material/DriveEta';
-import StarIcon from '@mui/icons-material/Star';
-import DirectionsSubwayIcon from '@mui/icons-material/DirectionsSubway';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { Recommendation, LugarFrecuentado } from '@/app/types';
-import L from 'leaflet';
-import RatingModal from './RatingModal';
-import LoadingModal from '@/app/(auth)/LoadingModal';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { useRouter } from 'next/navigation';
+import ApartmentIcon from '@mui/icons-material/Apartment';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import DirectionsSubwayIcon from '@mui/icons-material/DirectionsSubway';
+import DriveEtaIcon from '@mui/icons-material/DriveEta';
+import Image from "next/image"
+import KingBedIcon from '@mui/icons-material/KingBed';
+import L from 'leaflet';
+import LoadingModal from '@/app/(auth)/LoadingModal';
+import RatingModal from './RatingModal';
+import React, { useEffect, useState } from 'react';
+import SellIcon from '@mui/icons-material/Sell';
+import SquareFootIcon from '@mui/icons-material/SquareFoot';
+import StarIcon from '@mui/icons-material/Star';
 
 export const subtes_imgs = {
     "A": "https://emova.com.ar/wp-content/uploads/2021/11/past-a-60.png",
@@ -63,6 +64,7 @@ export default function RecommendationDetail() {
         tipo_moneda_expensas: '',
         estacion_cercana: [],
         drive_id: '',
+        _final_rating: 0
     });
 
     const [images, setImages] = useState<string[]>(['https://i.imgur.com/XyVJU8I.png']);
@@ -76,7 +78,7 @@ export default function RecommendationDetail() {
     }]);
 
     const [modalOpen, setModalOpen] = useState(false);
-    const [loading, setLoading] = useState(false); 
+    const [loading, setLoading] = useState(false);
 
     const propertyIcon = new L.Icon({
         iconUrl: 'https://i.imgur.com/QIh0JOI.png',
@@ -93,7 +95,7 @@ export default function RecommendationDetail() {
     });
 
     const getFrequentedPlaces = async () => {
-        let jwtToken = localStorage.getItem('jwtToken');
+        const jwtToken = localStorage.getItem('jwtToken');
         if (!jwtToken) {
             return;
         }
@@ -118,8 +120,8 @@ export default function RecommendationDetail() {
     }
 
     const getRecommendation = () => {
-        let reco = localStorage.getItem('property');
-        let recoImages = localStorage.getItem('propertyImages');
+        const reco = localStorage.getItem('property');
+        const recoImages = localStorage.getItem('propertyImages');
         if (!reco) {
             return;
         }
@@ -139,8 +141,6 @@ export default function RecommendationDetail() {
         getRecommendation();
         getFrequentedPlaces();
     }, []);
-
-    const shownLines: Set<string> = new Set();
 
     const handleOpenModal = () => {
         setModalOpen(true);
@@ -162,29 +162,29 @@ export default function RecommendationDetail() {
                         {images.length > 0
                             ? images.map((link, index) => (
                                 <div key={index}>
-                                    <img
+                                    <Image
                                         src={`/api/proxy?id=${link}`}
                                         alt={`Imagen ${index + 1}`}
+                                        width={20}
+                                        height={20}
                                         style={{
-                                            width: '100%',
-                                            height: 'auto',
                                             maxHeight: '400px',
                                             objectFit: 'cover',
                                         }}
                                         onError={(e) => {
-                                            e.target.src = "https://i.imgur.com/XyVJU8I.png";
+                                            (e.target as HTMLImageElement).src = "https://i.imgur.com/XyVJU8I.png";
                                         }}
                                     />
                                 </div>
                             ))
                             : [
                                 <div key="default-image">
-                                    <img
+                                    <Image
                                         src="https://i.imgur.com/XyVJU8I.png"
                                         alt="Imagen por defecto"
+                                        width={20}
+                                        height={20}
                                         style={{
-                                            width: '100%',
-                                            height: 'auto',
                                             maxHeight: '400px',
                                             objectFit: 'cover',
                                         }}
@@ -253,11 +253,13 @@ export default function RecommendationDetail() {
                             {Array.isArray(recommendation.estacion_cercana) && recommendation.estacion_cercana.length > 0 ? (
                                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1 }}>
                                     {Array.from(new Set(recommendation.estacion_cercana.map(estacion => estacion.linea))).map((linea, index) => (
-                                        <img
+                                        <Image
                                             key={index}
-                                            src={subtes_imgs[linea]}
+                                            src={subtes_imgs[linea as keyof typeof subtes_imgs]}
                                             alt={`Línea ${linea}`}
-                                            style={{ height: '24px', width: '24px', marginBottom: '5px' }}
+                                            style={{ marginBottom: '5px' }}
+                                            width={24}
+                                            height={24}
                                         />
                                     ))}
                                 </Box>
@@ -293,7 +295,7 @@ export default function RecommendationDetail() {
                                             key={`estacion-${index}-${estacionIndex}`}
                                             position={[estacion.lat, estacion.long]}
                                             icon={new L.Icon({
-                                                iconUrl: subtes_imgs[estacion.linea],
+                                                iconUrl: subtes_imgs[estacion.linea as keyof typeof subtes_imgs],
                                                 iconSize: [32, 32],
                                                 iconAnchor: [16, 32],
                                                 popupAnchor: [0, -32],
@@ -314,7 +316,7 @@ export default function RecommendationDetail() {
                                     key={index}
                                     position={[estacion.lat, estacion.long]}
                                     icon={new L.Icon({
-                                        iconUrl: subtes_imgs[estacion.linea],
+                                        iconUrl: subtes_imgs[estacion.linea as keyof typeof subtes_imgs],
                                         iconSize: [32, 32],
                                         iconAnchor: [16, 32],
                                         popupAnchor: [0, -32],

@@ -49,7 +49,7 @@ export type EstacionCercana = {
     lat: number;
     long: number;
 };
-  
+
 export type Recommendation = {
     id: string;
     tipo_propiedad: string;
@@ -67,6 +67,7 @@ export type Recommendation = {
     tipo_moneda_expensas: string;
     estacion_cercana: EstacionCercana[];
     drive_id: string;
+    _final_rating: number
 };
 
 export type Preferences = {
@@ -82,5 +83,5 @@ export type Preferences = {
     m2_max?: number
     lugares_frecuentados?: string[]
 
-    
+
 }

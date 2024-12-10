@@ -15,14 +15,14 @@ const styles = {
         borderRadius: 2,
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center', // Centra horizontalmente
+        alignItems: 'center',
     },
     text: {
-        color: 'black', // Cambia el color del texto a negro
-        textAlign: 'center', // Centra el texto
+        color: 'black',
+        textAlign: 'center',
     },
     button: {
-        marginTop: 2, // Espacio superior para el botón
+        marginTop: 2,
     },
 };
 
@@ -36,16 +36,16 @@ interface RatingModalProps {
     propertyId: string;
 }
 
-const RatingModal = ({ open, onClose, loading, propertyId, setLoading }: RatingModalProps) => {
+const RatingModal = ({ open, onClose, propertyId, setLoading }: RatingModalProps) => {
     const [rating, setRating] = useState(0);
     const [submitted, setSubmitted] = useState(false);
 
-    const handleStarClick = (value) => {
+    const handleStarClick = (value: number) => {
         setRating(value);
     };
 
     const handleSubmit = async () => {
-        let jwtToken = localStorage.getItem('jwtToken');
+        const jwtToken = localStorage.getItem('jwtToken');
         if (!jwtToken) {
             return;
         }
@@ -85,21 +85,21 @@ const RatingModal = ({ open, onClose, loading, propertyId, setLoading }: RatingM
                             Tu calificación ha sido enviada.
                         </Typography>
                         <Button onClick={onClose} sx={{
-                                    background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)', // Gradiente azul
-                                    borderRadius: '20px',  // Bordes redondeados
-                                    padding: '5px 15px',  // Tamaño del botón más pequeño
-                                    color: 'white',  // Texto blanco para contraste
-                                    fontWeight: 'bold',  // Texto en negrita
-                                    marginTop: '5%',
-                                    fontSize: '1rem', // Tamaño de fuente más pequeño (puedes ajustar según prefieras)
-                                    boxShadow: '0 2px 4px 2px rgba(33, 203, 243, .3)',  // Sombra suave
-                                    transition: 'transform 0.2s, box-shadow 0.2s',  // Transiciones suaves para el hover
-                                    '&:hover': {
-                                        backgroundColor: '#1976D2',  // Color de fondo más oscuro al pasar el cursor
-                                        boxShadow: '0 4px 8px 2px rgba(33, 203, 243, .5)',  // Sombra más intensa en hover
-                                        transform: 'scale(1.05)',  // Efecto de agrandamiento
-                                    },
-                                }}>
+                            background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                            borderRadius: '20px',
+                            padding: '5px 15px',
+                            color: 'white',
+                            fontWeight: 'bold',
+                            marginTop: '5%',
+                            fontSize: '1rem',
+                            boxShadow: '0 2px 4px 2px rgba(33, 203, 243, .3)',
+                            transition: 'transform 0.2s, box-shadow 0.2s',
+                            '&:hover': {
+                                backgroundColor: '#1976D2',
+                                boxShadow: '0 4px 8px 2px rgba(33, 203, 243, .5)',
+                                transform: 'scale(1.05)',
+                            },
+                        }}>
                             Cerrar
                         </Button>
                     </>

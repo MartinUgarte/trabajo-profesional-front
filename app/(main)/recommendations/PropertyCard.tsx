@@ -1,6 +1,7 @@
 import { EstacionCercana, Recommendation, subtes_imgs } from "@/app/types";
 import { Box, Button, Card, CardContent, CardMedia, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
+import Image from "next/image"
 import { useEffect, useState } from "react";
 
 type PropertyCardProps = {
@@ -10,14 +11,13 @@ type PropertyCardProps = {
 
 export default function PropertyCard({ recommendation, images }: PropertyCardProps) {
     const router = useRouter();
-    const [hovered, setHovered] = useState(false);
     const [imageLinks, setImageLinks] = useState<string[]>([]);
 
     useEffect(() => {
         if (recommendation.id in images) {
             setImageLinks(images[recommendation.id]);
         }
-    }, [images]);
+    }, [images, recommendation.id]);
 
     const formatPrice = (price: string) => {
         return new Intl.NumberFormat('es-AR').format(parseInt(price));
@@ -37,7 +37,7 @@ export default function PropertyCard({ recommendation, images }: PropertyCardPro
                 image={
                     recommendation.drive_id == null || !imageLinks[0]
                         ? 'https://i.imgur.com/XyVJU8I.png'
-                        : `/api/proxy?id=${imageLinks[0]}`  
+                        : `/api/proxy?id=${imageLinks[0]}`
                 }
                 alt="Imagen de propiedad"
                 onError={(e) => {
@@ -108,19 +108,19 @@ export default function PropertyCard({ recommendation, images }: PropertyCardPro
                                         boxShadow: '0 6px 15px rgba(0, 0, 0, 0.2)',
                                     },
                                 }}
-                                onMouseEnter={() => setHovered(true)}
-                                onMouseLeave={() => setHovered(false)}
                             >
                                 <Typography variant="body2" color="text.primary" component="div" sx={{ marginBottom: '1%' }}>
                                     Estaciones cercanas:
                                 </Typography>
                                 {recommendation.estacion_cercana.map((estacion: EstacionCercana, index) => (
                                     <Box key={index} display="flex" alignItems="center" sx={{ marginBottom: '8px' }}>
-                                        {subtes_imgs[estacion.linea] && (
-                                            <img
-                                                src={subtes_imgs[estacion.linea]}
+                                        {subtes_imgs[estacion.linea as keyof typeof subtes_imgs] && (
+                                            <Image
+                                                src={subtes_imgs[estacion.linea as keyof typeof subtes_imgs]}
                                                 alt={`Línea ${estacion.linea}`}
                                                 style={{ width: '5%', height: 'auto', marginRight: '2%' }}
+                                                width={20}
+                                                height={20}
                                             />
                                         )}
                                         <Typography variant="body2" color="text.secondary" component="div">
