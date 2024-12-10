@@ -37,7 +37,7 @@ export default function PropertyCard({ recommendation, images }: PropertyCardPro
                 image={
                     recommendation.drive_id == null || !imageLinks[0]
                         ? 'https://i.imgur.com/XyVJU8I.png'
-                        : `/api/proxy?id=${imageLinks[0]}`
+                        : `/api/proxysmall?id=${imageLinks[0]}`
                 }
                 alt="Imagen de propiedad"
                 onError={(e) => {

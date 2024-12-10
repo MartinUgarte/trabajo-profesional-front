@@ -165,8 +165,8 @@ export default function RecommendationDetail() {
                                     <Image
                                         src={`/api/proxy?id=${link}`}
                                         alt={`Imagen ${index + 1}`}
-                                        width={20}
-                                        height={20}
+                                        width={1024}
+                                        height={768}
                                         style={{
                                             maxHeight: '400px',
                                             objectFit: 'cover',

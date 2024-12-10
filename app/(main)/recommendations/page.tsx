@@ -119,12 +119,7 @@ export default function Recommendations() {
                 "Authorization": `Bearer ${jwtToken}`
             },
 
-            body: JSON.stringify({
-                collab: {
-                    user_id: 1
-                },
-                kbrs: JSON.parse(preferences)
-            }),
+            body: JSON.stringify(preferences),
         })
             .then((res) => res.json())
             .then((data) => {
@@ -238,9 +233,9 @@ export default function Recommendations() {
                     sx={{
                         textAlign: 'center',
                         cursor: 'pointer',
-                        transition: 'transform 0.3s ease', // Transición suave
+                        transition: 'transform 0.3s ease', 
                         '&:hover': {
-                            transform: 'scale(1.2)', // Aumenta el tamaño al 120%
+                            transform: 'scale(1.2)',
                         },
                     }}
                     justifyContent='center'
@@ -267,42 +262,41 @@ export default function Recommendations() {
                         borderRadius: '10px',
                     },
                     '&::-webkit-scrollbar-thumb': {
-                        background: 'rgba(0, 92, 179, 0.7)', // Color del pulgar de la barra
+                        background: 'rgba(0, 92, 179, 0.7)', 
                         borderRadius: '10px',
                     },
                     '&::-webkit-scrollbar-thumb:hover': {
-                        background: 'rgba(0, 92, 179, 1)', // Color del pulgar al pasar el ratón
+                        background: 'rgba(0, 92, 179, 1)', 
                     },
                 }}
             >
-                {loading ? ( // Mostrar CircularProgress mientras se carga
+                {loading ? ( 
                     <Box display="flex" justifyContent="center" alignItems="center" height="100%">
                         <Box
                             sx={{
                                 position: 'relative',
-                                display: 'inline-flex', // Esto permite superponer el CircularProgress sobre la imagen
+                                display: 'inline-flex', 
                             }}
                         >
-                            {/* Imagen que será rodeada */}
+                          
                             <Box
                                 component="img"
-                                src="https://i.imgur.com/wE0iUm5.png" // Aquí va tu imagen
+                                src="https://i.imgur.com/wE0iUm5.png"
                                 alt="Loading Image"
                                 sx={{
-                                    width: 100, // Puedes ajustar el tamaño de la imagen
+                                    width: 100,
                                     height: 100,
-                                    borderRadius: '50%', // Si quieres que sea circular
+                                    borderRadius: '50%', 
                                 }}
                             />
 
-                            {/* CircularProgress que rodea la imagen */}
                             <CircularProgress
-                                size={120} // Asegúrate de que el size sea un poco más grande que la imagen para que la rodee
+                                size={120} 
                                 sx={{
                                     position: 'absolute',
-                                    top: '-10px', // Ajusta la posición si es necesario
+                                    top: '-10px', 
                                     left: '-10px',
-                                    zIndex: 1, // Asegura que el CircularProgress esté sobre la imagen
+                                    zIndex: 1,
                                 }}
                             />
                         </Box>

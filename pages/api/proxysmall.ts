@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return;
     }
 
-    const url = `https://drive.google.com/uc?id=${id}`;
+    const url = `https://drive.google.com/thumbnail?id=${id}`;
 
     try {
         const response = await fetch(url);
