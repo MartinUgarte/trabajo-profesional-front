@@ -76,7 +76,7 @@ export default function RecommendationDetail() {
     }]);
 
     const [modalOpen, setModalOpen] = useState(false);
-    const [loading, setLoading] = useState(false); // Estado de carga
+    const [loading, setLoading] = useState(false); 
 
     const propertyIcon = new L.Icon({
         iconUrl: 'https://i.imgur.com/QIh0JOI.png',
@@ -111,7 +111,6 @@ export default function RecommendationDetail() {
             return res.json();
         })
             .then((data) => {
-                console.log('lugares frec: ', data)
                 setLugaresFrecuentados(data);
             })
 
@@ -121,7 +120,6 @@ export default function RecommendationDetail() {
     const getRecommendation = () => {
         let reco = localStorage.getItem('property');
         let recoImages = localStorage.getItem('propertyImages');
-        console.log('RECO: ', recoImages)
         if (!reco) {
             return;
         }
@@ -141,10 +139,6 @@ export default function RecommendationDetail() {
         getRecommendation();
         getFrequentedPlaces();
     }, []);
-
-    useEffect(() => {
-        console.log('Lugares frecuentados:', lugaresFrecuentados);
-    }, [lugaresFrecuentados]);
 
     const shownLines: Set<string> = new Set();
 
@@ -166,10 +160,10 @@ export default function RecommendationDetail() {
                 <Paper elevation={3} sx={{ width: '60%' }}>
                     <Carousel showThumbs={false} showStatus={false} dynamicHeight>
                         {images.length > 0
-                            ? images.map((src, index) => (
+                            ? images.map((link, index) => (
                                 <div key={index}>
                                     <img
-                                        src={`https://drive.google.com/thumbnail?id=${src}&sz=w10000`}
+                                        src={`https://drive.google.com/thumbnail?id=${link}&sz=w10000`}
                                         alt={`Imagen ${index + 1}`}
                                         style={{
                                             width: '100%',
@@ -178,7 +172,7 @@ export default function RecommendationDetail() {
                                             objectFit: 'cover',
                                         }}
                                         onError={(e) => {
-                                            console.error(`Error loading image at index ${index} with ID: ${src}`, e);
+                                            e.target.src = "https://i.imgur.com/XyVJU8I.png";
                                         }}
                                     />
                                 </div>

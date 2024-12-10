@@ -14,6 +14,37 @@ import PlaceIcon from '@mui/icons-material/Place';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+const fetchWithRetry = async (url: string, retries = 5, delayTime = 200) => {
+    for (let i = 0; i < retries; i++) {
+        try {
+           
+            const response = await fetch(url);
+            console.log(`Intento ${i + 1}, estado: ${response.status}`);
+
+            if (response.status === 429) {
+                console.error('Error 429: Too Many Requests');
+                throw new Error('Rate limit exceeded');
+            }
+
+            if (!response.ok) {
+                console.error(`Error: Estado HTTP ${response.status}`);
+                throw new Error(`Request failed with status ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            if (i === retries - 1) {
+                console.log('Error al realizar fetch. Se alcanzaron los intentos máximos:', error);
+                throw error; 
+            }
+            console.log('Error al realizar fetch. Intentando de nuevo en', delayTime * 2 ** i, 'ms:', error);
+            await delay(delayTime * 2 ** i); 
+        }
+    }
+};
+
 export default function Recommendations() {
     const router = useRouter();
     const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -23,43 +54,30 @@ export default function Recommendations() {
     const [loading, setLoading] = useState<boolean>(false);
 
     const getRecommendations = () => {
+        const recos = localStorage.getItem('recommendations');
+        if (!recos) return;
 
-        let recos = localStorage.getItem('recommendations');
-
-        console.log('recos', recos)
-        if (!recos) {
-            return;
-        }
         setRecommendations(JSON.parse(recos));
 
-        let totalCount = localStorage.getItem('totalCount');
-        if (!totalCount) {
-            return;
-        }
-        setTotalCount(totalCount);
+        const totalCount = localStorage.getItem('totalCount');
+        if (totalCount) setTotalCount(totalCount);
 
-        let preferences = localStorage.getItem('preferences');
-        if (!preferences) {
-            return;
-        }
-        setPreferences(JSON.parse(preferences));
-
-        console.log('preferences', preferences);
-    }
+        const preferences = localStorage.getItem('preferences');
+        if (preferences) setPreferences(JSON.parse(preferences));
+    };
 
     const apiKey = 'AIzaSyAfPFEbgK7iwpufDlShVKoGKrwQqkXElww';
 
     const fetchPropertyImages = async (property_folder_id: string) => {
+        const url = `https://www.googleapis.com/drive/v3/files?q='${property_folder_id}'+in+parents&key=${apiKey}&fields=files(id,name,mimeType)&pageSize=10`;
         try {
-            const response = await fetch(`https://www.googleapis.com/drive/v3/files?q='${property_folder_id}'+in+parents&key=${apiKey}&fields=files(id,name,mimeType)`);
-            const data = await response.json();
-            console.log('data: ', data)
-            const imageLinks = data.files
-                .filter((file: { mimeType: string; }) => file.mimeType.startsWith('image/'))
-                .map((file: { id: any; }) => `${file.id}`);
-            return imageLinks;
+            const data = await fetchWithRetry(url);
+            return data.files
+                .filter((file: { mimeType: string }) => file.mimeType.startsWith('image/'))
+                .map((file: { id: string }) => file.id);
         } catch (error) {
             console.error('Error al cargar imágenes:', error);
+            return [];
         }
     };
 
@@ -70,11 +88,11 @@ export default function Recommendations() {
     useEffect(() => {
         const fetchImagesForRecommendations = async () => {
             for (const recommendation of recommendations) {
-                if (recommendation.drive_id != undefined) {
+                if (recommendation.drive_id) {
                     const propertyImages = await fetchPropertyImages(recommendation.drive_id);
                     setImages(prevImages => ({
                         ...prevImages,
-                        [recommendation.id]: propertyImages
+                        [recommendation.id]: propertyImages,
                     }));
                 }
             }
@@ -113,7 +131,6 @@ export default function Recommendations() {
         })
             .then((res) => res.json())
             .then((data) => {
-                console.log('obtuve: ', data)
                 localStorage.setItem("recommendations", JSON.stringify(data.recommendations));
                 localStorage.setItem("totalCount", data.total_count);
                 getRecommendations();
