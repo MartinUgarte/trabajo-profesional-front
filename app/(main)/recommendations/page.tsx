@@ -52,9 +52,14 @@ export default function Recommendations() {
 
     const getRecommendations = () => {
         const recos = localStorage.getItem('recommendations');
-        if (!recos) return;
+        if (!recos || recos == undefined) return;
 
-        setRecommendations(JSON.parse(recos));
+        try{
+            setRecommendations(JSON.parse(recos));
+        } catch (error) {
+            console.log(recos)
+            console.error('Error al parsear recomendaciones', error);
+        }
 
         const totalCount = localStorage.getItem('totalCount');
         if (totalCount) setTotalCount(totalCount);
@@ -62,7 +67,6 @@ export default function Recommendations() {
         const preferences = localStorage.getItem('preferences');
         if (preferences) setPreferences(JSON.parse(preferences));
     };
-
     const apiKey = 'AIzaSyAfPFEbgK7iwpufDlShVKoGKrwQqkXElww';
 
     const fetchPropertyImages = async (property_folder_id: string) => {
@@ -119,7 +123,7 @@ export default function Recommendations() {
                 "Authorization": `Bearer ${jwtToken}`
             },
 
-            body: JSON.stringify(preferences),
+            body: preferences,
         })
             .then((res) => res.json())
             .then((data) => {
