@@ -20,26 +20,23 @@ const fetchWithRetry = async (url: string, retries = 5, delayTime = 200) => {
     for (let i = 0; i < retries; i++) {
         try {
            
-            const response = await fetch(url);
-            console.log(`Intento ${i + 1}, estado: ${response.status}`);
-
-            if (response.status === 429) {
-                console.error('Error 429: Too Many Requests');
-                throw new Error('Rate limit exceeded');
-            }
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              });
+    
 
             if (!response.ok) {
-                console.error(`Error: Estado HTTP ${response.status}`);
                 throw new Error(`Request failed with status ${response.status}`);
             }
 
             return await response.json();
         } catch (error) {
             if (i === retries - 1) {
-                console.log('Error al realizar fetch. Se alcanzaron los intentos máximos:', error);
                 throw error; 
             }
-            console.log('Error al realizar fetch. Intentando de nuevo en', delayTime * 2 ** i, 'ms:', error);
             await delay(delayTime * 2 ** i); 
         }
     }

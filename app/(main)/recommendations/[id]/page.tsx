@@ -163,7 +163,7 @@ export default function RecommendationDetail() {
                             ? images.map((link, index) => (
                                 <div key={index}>
                                     <img
-                                        src={`https://drive.google.com/thumbnail?id=${link}&sz=w10000`}
+                                        src={`/api/proxy?id=${link}`}
                                         alt={`Imagen ${index + 1}`}
                                         style={{
                                             width: '100%',

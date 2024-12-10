@@ -1,4 +1,3 @@
-// Código completo del componente PropertyCard
 import { EstacionCercana, Recommendation, subtes_imgs } from "@/app/types";
 import { Box, Button, Card, CardContent, CardMedia, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
@@ -7,7 +6,7 @@ import { useEffect, useState } from "react";
 type PropertyCardProps = {
     recommendation: Recommendation;
     images: { [key: string]: string[] };
-}
+};
 
 export default function PropertyCard({ recommendation, images }: PropertyCardProps) {
     const router = useRouter();
@@ -19,7 +18,7 @@ export default function PropertyCard({ recommendation, images }: PropertyCardPro
             setImageLinks(images[recommendation.id]);
         }
     }, [images]);
-    // Función para formatear el precio
+
     const formatPrice = (price: string) => {
         return new Intl.NumberFormat('es-AR').format(parseInt(price));
     };
@@ -32,14 +31,13 @@ export default function PropertyCard({ recommendation, images }: PropertyCardPro
 
     return (
         <Card sx={{ display: 'flex', height: '20%' }}>
-            {/* Imagen de la propiedad */}
             <CardMedia
                 component="img"
                 sx={{ width: 250, height: 250, objectFit: 'cover' }}
                 image={
                     recommendation.drive_id == null || !imageLinks[0]
                         ? 'https://i.imgur.com/XyVJU8I.png'
-                        : `https://drive.google.com/thumbnail?id=${imageLinks[0]}`
+                        : `/api/proxy?id=${imageLinks[0]}`  
                 }
                 alt="Imagen de propiedad"
                 onError={(e) => {
@@ -47,12 +45,10 @@ export default function PropertyCard({ recommendation, images }: PropertyCardPro
                 }}
             />
 
-            {/* Contenido de la Card con flex para dividir */}
             <Box sx={{ display: 'flex', flex: 1 }}>
                 <CardContent sx={{ flex: 1, display: 'flex' }}>
-                    {/* Información de la propiedad (lado izquierdo) */}
                     <Box sx={{ flex: 1, paddingRight: '2%' }}>
-                        <Box display='flex' flexDirection='row'>
+                        <Box display="flex" flexDirection="row">
                             <Typography sx={{ mr: '2%' }} component="div" variant="h6">
                                 ${formatPrice(recommendation.precio)}
                             </Typography>
@@ -60,15 +56,19 @@ export default function PropertyCard({ recommendation, images }: PropertyCardPro
                                 {recommendation.tipo_moneda}
                             </Typography>
                         </Box>
-
                         <Typography variant="subtitle1" color="text.secondary" component="div">
                             {recommendation.direccion}
                         </Typography>
                         <Typography variant="body2" color="text.secondary" component="div">
                             {recommendation.m2} m² - {recommendation.ambientes} ambientes
                         </Typography>
-                        <Typography sx={{ mt: '2%', color: '#00abe4' }} variant="body1" color="text.secondary" component="div">
-                            {Math.round(recommendation._final_rating / 5 * 100)}% match
+                        <Typography
+                            sx={{ mt: '2%', color: '#00abe4' }}
+                            variant="body1"
+                            color="text.secondary"
+                            component="div"
+                        >
+                            {Math.round((recommendation._final_rating / 5) * 100)}% match
                         </Typography>
                         <Button
                             variant="contained"
@@ -93,13 +93,11 @@ export default function PropertyCard({ recommendation, images }: PropertyCardPro
                             Ver más
                         </Button>
                     </Box>
-
-                    {/* Estaciones cercanas (lado derecho) */}
                     <Box sx={{ flex: 1 }}>
                         {recommendation.estacion_cercana.length > 0 && (
                             <Box
                                 sx={{
-                                    backgroundColor: '#E3F2FD',  // Color azul claro para contraste
+                                    backgroundColor: '#E3F2FD',
                                     borderRadius: '8px',
                                     padding: '16px',
                                     mt: '1.4%',
@@ -125,11 +123,7 @@ export default function PropertyCard({ recommendation, images }: PropertyCardPro
                                                 style={{ width: '5%', height: 'auto', marginRight: '2%' }}
                                             />
                                         )}
-                                        <Typography
-                                            variant="body2"
-                                            color="text.secondary"
-                                            component="div"
-                                        >
+                                        <Typography variant="body2" color="text.secondary" component="div">
                                             {estacion.estacion} ({estacion.distancia} metros)
                                         </Typography>
                                     </Box>
