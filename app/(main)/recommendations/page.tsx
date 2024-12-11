@@ -19,14 +19,14 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const fetchWithRetry = async (url: string, retries = 5, delayTime = 200) => {
     for (let i = 0; i < retries; i++) {
         try {
-           
+
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
-                  'Content-Type': 'application/json',
+                    'Content-Type': 'application/json',
                 },
-              });
-    
+            });
+
 
             if (!response.ok) {
                 throw new Error(`Request failed with status ${response.status}`);
@@ -35,9 +35,9 @@ const fetchWithRetry = async (url: string, retries = 5, delayTime = 200) => {
             return await response.json();
         } catch (error) {
             if (i === retries - 1) {
-                throw error; 
+                throw error;
             }
-            await delay(delayTime * 2 ** i); 
+            await delay(delayTime * 2 ** i);
         }
     }
 };
@@ -54,7 +54,7 @@ export default function Recommendations() {
         const recos = localStorage.getItem('recommendations');
         if (!recos || recos == undefined) return;
 
-        try{
+        try {
             setRecommendations(JSON.parse(recos));
         } catch (error) {
             console.log(recos)
@@ -172,19 +172,21 @@ export default function Recommendations() {
                     <Box flex='0.7' display='flex' flexDirection='row' width='100%' height='100%' justifyContent='space-between' alignItems='center'>
                         <Box sx={{ textAlign: 'center', ml: '4%' }}>
                             <ApartmentIcon fontSize="large" />
-                            <Typography>
+                            <Typography sx={{fontSize: '0.9em'}}>
                                 {preferences.tipo_propiedad ? preferences.tipo_propiedad : '-'}
                             </Typography>
                         </Box>
                         <Box sx={{ textAlign: 'center' }}>
                             <SellIcon fontSize="large" />
-                            <Typography>{preferences.alquiler ? 'alquiler' : 'venta'}</Typography>
+                            <Typography sx={{fontSize: '0.9em'}}>{preferences.alquiler ? 'alquiler' : 'venta'}</Typography>
                         </Box>
                         <Box sx={{ textAlign: 'center' }}>
                             <KingBedIcon fontSize="large" />
-                            <Typography>
+                            <Typography sx={{fontSize: '0.9em'}}>
                                 {preferences.ambientes_min && preferences.ambientes_max
-                                    ? `${preferences.ambientes_min} - ${preferences.ambientes_max} ambientes`
+                                    ? preferences.ambientes_min === preferences.ambientes_max
+                                        ? `${preferences.ambientes_min} ambientes`
+                                        : `${preferences.ambientes_min} - ${preferences.ambientes_max} ambientes`
                                     : preferences.ambientes_min
                                         ? `> ${preferences.ambientes_min} ambientes`
                                         : preferences.ambientes_max
@@ -194,19 +196,22 @@ export default function Recommendations() {
                         </Box>
                         <Box sx={{ textAlign: 'center' }}>
                             <SquareFootIcon fontSize="large" />
-                            <Typography>
+                            <Typography sx={{fontSize: '0.9em'}}>
                                 {preferences.m2_min && preferences.m2_max
-                                    ? `${preferences.m2_min} - ${preferences.m2_max} m2`
+                                    ? preferences.m2_min === preferences.m2_max
+                                        ? `${preferences.m2_min} m2`
+                                        : `${preferences.m2_min} - ${preferences.m2_max} m2`
                                     : preferences.m2_min
                                         ? `> ${preferences.m2_min} m2`
                                         : preferences.m2_max
                                             ? `< ${preferences.m2_max} m2`
                                             : '-'}
                             </Typography>
+
                         </Box>
                         <Box sx={{ textAlign: 'center' }}>
                             <AttachMoneyIcon fontSize="large" />
-                            <Typography>
+                            <Typography sx={{fontSize: '0.9em'}}>
                                 {preferences.precio_min && preferences.precio_max
                                     ? `$${new Intl.NumberFormat('es-ES').format(preferences.precio_min)} - $${new Intl.NumberFormat('es-ES').format(preferences.precio_max)}`
                                     : preferences.precio_min
@@ -218,11 +223,11 @@ export default function Recommendations() {
                         </Box>
                         <Box sx={{ textAlign: 'center' }}>
                             <DriveEtaIcon fontSize="large" />
-                            <Typography>{preferences.cochera ? 'con cochera' : 'sin cochera'}</Typography>
+                            <Typography sx={{fontSize: '0.9em'}}>{preferences.cochera ? 'con cochera' : 'sin cochera'}</Typography>
                         </Box>
                         <Box sx={{ textAlign: 'center' }}>
                             <PlaceIcon fontSize="large" />
-                            <Typography>cerca de {preferences.lugares_frecuentados?.join(', ')}</Typography>
+                            <Typography sx={{fontSize: '0.9em'}}>{preferences.lugares_frecuentados?.join(', ')}</Typography>
                         </Box>
                     </Box>
 
@@ -237,7 +242,7 @@ export default function Recommendations() {
                     sx={{
                         textAlign: 'center',
                         cursor: 'pointer',
-                        transition: 'transform 0.3s ease', 
+                        transition: 'transform 0.3s ease',
                         '&:hover': {
                             transform: 'scale(1.2)',
                         },
@@ -266,23 +271,23 @@ export default function Recommendations() {
                         borderRadius: '10px',
                     },
                     '&::-webkit-scrollbar-thumb': {
-                        background: 'rgba(0, 92, 179, 0.7)', 
+                        background: 'rgba(0, 92, 179, 0.7)',
                         borderRadius: '10px',
                     },
                     '&::-webkit-scrollbar-thumb:hover': {
-                        background: 'rgba(0, 92, 179, 1)', 
+                        background: 'rgba(0, 92, 179, 1)',
                     },
                 }}
             >
-                {loading ? ( 
+                {loading ? (
                     <Box display="flex" justifyContent="center" alignItems="center" height="100%">
                         <Box
                             sx={{
                                 position: 'relative',
-                                display: 'inline-flex', 
+                                display: 'inline-flex',
                             }}
                         >
-                          
+
                             <Box
                                 component="img"
                                 src="https://i.imgur.com/wE0iUm5.png"
@@ -290,15 +295,15 @@ export default function Recommendations() {
                                 sx={{
                                     width: 100,
                                     height: 100,
-                                    borderRadius: '50%', 
+                                    borderRadius: '50%',
                                 }}
                             />
 
                             <CircularProgress
-                                size={120} 
+                                size={120}
                                 sx={{
                                     position: 'absolute',
-                                    top: '-10px', 
+                                    top: '-10px',
                                     left: '-10px',
                                     zIndex: 1,
                                 }}

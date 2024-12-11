@@ -84,7 +84,7 @@ export default function RegisterPage() {
                     router.push("../login");
                 } else {
                     return res.json().then((data) => {
-                        setErrorText(data.msg || "Error desconocido en el servidor.");
+                        setErrorText(data.detail || "Error desconocido en el servidor.");
                         setShowErrorModal(true);
                         setShowLoading(false);
                     });

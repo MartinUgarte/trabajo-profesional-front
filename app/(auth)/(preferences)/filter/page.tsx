@@ -41,16 +41,16 @@ const iconButtonStyles = {
 
 
 type FormValues = {
-    propertyType: string;
-    minPrice: number;
-    maxPrice: number;
-    currency: string;
-    minRooms: number;
-    maxRooms: number;
-    hasGarage: boolean;
-    rental: boolean;
-    minM2: number;
-    maxM2: number;
+    propertyType: string | null;
+    minPrice: number | null;
+    maxPrice: number | null;
+    currency: string | null;
+    minRooms: number | null;
+    maxRooms: number | null;
+    hasGarage: boolean | null;
+    rental: boolean | null;
+    minM2: number | null;
+    maxM2: number | null;
 };
 
 export default function Filter() {
@@ -60,13 +60,13 @@ export default function Filter() {
     const form = useForm<FormValues>({
         defaultValues: {
             propertyType: "",
-            minPrice: 0,
-            maxPrice: 0,
+            minPrice: null,
+            maxPrice: null,
             currency: "",
-            minRooms: 0,
-            maxRooms: 0,
-            minM2: 0,
-            maxM2: 0,
+            minRooms: null,
+            maxRooms: null,
+            minM2: null,
+            maxM2: null,
             hasGarage: false,
             rental: true,
         },
@@ -179,7 +179,16 @@ export default function Filter() {
                                 sx={{ marginTop: 2, width: '39%' }}
                                 onInput={handleInput}
                                 label={'Precio mínimo'}
-                                {...register('minPrice')}
+                                {...register('minPrice', {
+                                    valueAsNumber: true,
+                                    validate: (value) => {
+                                        const maxPrice = form.watch('maxPrice');
+                                        if (value == null || maxPrice == null) {
+                                            return true; 
+                                        }
+                                        return value <= maxPrice || 'Debe ser menor que "Precio máximo"';
+                                    },
+                                })}
                                 error={!!errors.minPrice}
                                 helperText={errors.minPrice?.message}
                             />
@@ -188,7 +197,16 @@ export default function Filter() {
                                 sx={{ marginTop: 2, width: '39%' }}
                                 onInput={handleInput}
                                 label={'Precio máximo'}
-                                {...register('maxPrice')}
+                                {...register('maxPrice', {
+                                    valueAsNumber: true,
+                                    validate: (value) => {
+                                        const minPrice = form.watch('minPrice');
+                                        if (value == null || minPrice == null) {
+                                            return true; 
+                                        }
+                                        return value >= minPrice || 'Debe ser mayor que "Precio mínimo"';
+                                    },
+                                })}
                                 error={!!errors.maxPrice}
                                 helperText={errors.maxPrice?.message}
                             />
@@ -215,7 +233,20 @@ export default function Filter() {
                                 sx={{ marginTop: 2, width: '24%' }}
                                 onInput={handleInput}
                                 label={'Ambientes mínimos'}
-                                {...register('minRooms')}
+                                {...register('minRooms', {
+                                    valueAsNumber: true,
+                                    max: {
+                                        value: 10,
+                                        message: 'La cantidad de habitaciones debe ser menor que 10',
+                                    },
+                                    validate: (value) => {
+                                        const maxRooms = form.watch('maxRooms');
+                                        if (value == null || maxRooms == null) {
+                                            return true; 
+                                        }
+                                        return value <= maxRooms || 'Debe ser menor que "Ambientes máximos"';
+                                    },
+                                })}      
                                 error={!!errors.minRooms}
                                 helperText={errors.minRooms?.message}
                             />
@@ -224,7 +255,20 @@ export default function Filter() {
                                 sx={{ marginTop: 2, width: '24%', }}
                                 onInput={handleInput}
                                 label={'Ambientes máximos'}
-                                {...register('maxRooms')}
+                                {...register('maxRooms', {
+                                    valueAsNumber: true,
+                                    max: {
+                                        value: 10,
+                                        message: 'La cantidad de habitaciones debe ser menor que 10',
+                                    },
+                                    validate: (value) => {
+                                        const minRooms = form.watch('minRooms');
+                                        if (value == null || minRooms == null) {
+                                            return true; 
+                                        }
+                                        return value >= minRooms || 'Debe ser mayor que "Ambientes mínimos"';
+                                    },
+                                })}
                                 error={!!errors.maxRooms}
                                 helperText={errors.maxRooms?.message}
                             />
@@ -233,7 +277,20 @@ export default function Filter() {
                                 sx={{ marginTop: 2, width: '24%' }}
                                 onInput={handleInput}
                                 label={'M2 mínimos'}
-                                {...register('minM2')}
+                                {...register('minM2', {
+                                    valueAsNumber: true,
+                                    min: {
+                                        value: 10,
+                                        message: 'Los metros cuadrados deben ser como mínimo 10',
+                                    },
+                                    validate: (value) => {
+                                        const maxM2 = form.watch('maxM2');
+                                        if (value == null || maxM2 == null) {
+                                            return true; 
+                                        }
+                                        return value <= maxM2 || 'Debe ser menor que "M2 máximos"';
+                                    },
+                                })}
                                 error={!!errors.minM2}
                                 helperText={errors.minM2?.message}
                             />
@@ -242,7 +299,20 @@ export default function Filter() {
                                 sx={{ marginTop: 2, width: '24%', }}
                                 onInput={handleInput}
                                 label={'M2 máximos'}
-                                {...register('maxM2')}
+                                {...register('maxM2', {
+                                    valueAsNumber: true,
+                                    min: {
+                                        value: 10,
+                                        message: 'Los metros cuadrados deben ser como mínimo 10',
+                                    },
+                                    validate: (value) => {
+                                        const minM2 = form.watch('minM2');
+                                        if (value == null || minM2 == null) {
+                                            return true; 
+                                        }
+                                        return value >= minM2 || 'Debe ser mayor que "M2 mínimos"';
+                                    },
+                                })}
                                 error={!!errors.maxM2}
                                 helperText={errors.maxM2?.message}
                             />

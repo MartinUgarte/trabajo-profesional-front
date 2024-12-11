@@ -12,6 +12,7 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import LoadingModal from "../../LoadingModal";
+import ErrorModal from "../../ErrorModal";
 
 type FormValues = {
     frequentedPlaces: string[];
@@ -55,6 +56,8 @@ export default function Filter() {
     const [frequentedPlaces, setFrequentedPlaces] = useState<string[]>([""]);
     const [loading, setLoading] = useState(false); 
     const router = useRouter();
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [errorText, setErrorText] = useState("");
 
     useEffect(() => {
         document.body.style.overflow = 'hidden';
@@ -99,7 +102,11 @@ export default function Filter() {
         })
             .then((res) => {
                 if (!res.ok) {
-                    throw new Error(`HTTP error! status: ${res.status}`);
+                    return res.json().then((data) => {
+                        setErrorText(data.detail || "Error desconocido en el servidor.");
+                        setShowErrorModal(true);
+                        setLoading(false);
+                    });
                 }
                 return res.json();
             })
@@ -148,6 +155,12 @@ export default function Filter() {
 
         >
             <LoadingModal open={loading} />
+
+            <ErrorModal
+                open={showErrorModal}
+                onClose={() => setShowErrorModal(false)}
+                text={errorText}
+            />
 
             <Box width='100%' flexDirection='column' justifyContent='center' alignItems='center' height='100%' display='flex' flex='1' >
 
